@@ -24,7 +24,7 @@ class CommonFanZA5:
         power = Command(2, 1)             # +
         level = Command(2, 2)             # +
         swing_mode = Command(2, 3)        # +
-        swing_mode_angle = Command(2, 5)  # TODO Not implemented
+        swing_mode_angle = Command(2, 5)  # +
         mode = Command(2, 7)              # TODO Not implemented
         power_off_time = Command(2, 10)   # TODO Not implemented
         anion = Command(2, 11)            # TODO Not implemented
@@ -107,6 +107,14 @@ class ModelFanZA5:
         
         self.__set(_command = CommonFanZA5.Fan.swing_mode_angle, value=value)
 
+    @property
+    def anion(self) -> bool:
+        return self.__get(_command = CommonFanZA5.Fan.anion)
+    
+    @anion.setter
+    def anion(self, value: bool) -> None:
+        self.__set(_command = CommonFanZA5.Fan.anion, value=value)
+
     def move(self, value: Literal['left', 'right']) -> None:
         self.__set(_command = CommonFanZA5.CustomService.move, value=value)
 
@@ -124,7 +132,7 @@ class FanZA5(ModelFanZA5):
             self.model.split('.')
         ))
 
-        self._switches = [FanPowerSwitch, FanSwingModeSwitch]
+        self._switches = [FanPowerSwitch, FanSwingModeSwitch, FanAnionSwitch]
         self._buttons  = [FanMoveLeftButton, FanMoveRightButton]
         self._selects  = [FanSpeedLevelSelect] 
         self._numbers  = [FanSwingAngleNumber]
@@ -226,6 +234,33 @@ class FanSwingModeSwitch(SwitchEntity):
     @property
     def icon(self):
         return "mdi:sync" if self.is_on else "mdi:circle-outline"
+
+class FanAnionSwitch(SwitchEntity):
+    def __init__(self, fan_device: FanZA5):
+        self._device = fan_device
+        self._name = f"Fan Anion {self._device.name}"
+
+    @property
+    def name(self):
+        return self._name
+
+    @property
+    def is_on(self):
+        return self._device.anion
+
+    def turn_on(self):
+        self._device.anion = True
+
+    def turn_off(self):
+        self._device.anion = False
+
+    @property
+    def device_info(self):
+        return {"identifiers": {(DOMAIN, self._name.lower().replace(" ", "_"))}}
+
+    @property
+    def icon(self):
+        return "mdi:blur" if self.is_on else "mdi:blur-off"
 
 # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- #
 
