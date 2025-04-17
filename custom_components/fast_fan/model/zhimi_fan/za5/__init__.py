@@ -437,7 +437,7 @@ class FanTempSensor(SensorEntity):
 
     @property
     def native_value(self):
-        return self._device.temp
+        return self._device.temperature
 
     @property
     def native_unit_of_measurement(self):
