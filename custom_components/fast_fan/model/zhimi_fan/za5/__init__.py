@@ -35,6 +35,15 @@ class CommonFanZA5:
         speed_procent = Command(6, 8)  # TODO Not implemented
 
 class ModelFanZA5:
+    model='zhimi.fan.za5'
+
+    lavels = [1, 2, 3, 4]
+
+    min_angle = 30
+    max_angle = 120
+
+
+
     def __init__(self, object: MiotDevice) -> None:
         self.object = object
 
@@ -73,6 +82,10 @@ class ModelFanZA5:
         return _value
 
     @property
+    def speed_rpm(self) -> int: 
+        return self.__get(_command = CommonFanZA5.CustomService.speed_rpm)
+
+    @property
     def power(self) -> bool: 
         return self.__get(_command = CommonFanZA5.Fan.power)
 
@@ -102,7 +115,7 @@ class ModelFanZA5:
     
     @swing_angle.setter
     def swing_angle(self, value: int) -> None:
-        if not (30 <= value <= 120):
+        if not (self.min_angle <= value <= self.max_angle):
             raise ValueError('Angle must be between 30 and 120 degrees')
         
         self.__set(_command = CommonFanZA5.Fan.swing_mode_angle, value=value)
@@ -120,9 +133,6 @@ class ModelFanZA5:
 
 
 class FanZA5(ModelFanZA5):
-    model='zhimi.fan.za5'
-    
-    lavels = [1, 2, 3, 4]
 
     def __init__(self, object: MiotDevice) -> None:
         super().__init__(object=object)
@@ -136,6 +146,7 @@ class FanZA5(ModelFanZA5):
         self._buttons  = [FanMoveLeftButton, FanMoveRightButton]
         self._selects  = [FanSpeedLevelSelect] 
         self._numbers  = [FanSwingAngleNumber]
+        self._sensors  = [FanSpeedRpmSensor]
 
     def __entity(self, entity: list[any]):
         return list(map(
@@ -158,6 +169,10 @@ class FanZA5(ModelFanZA5):
     @property
     def numbers(self):
         return self.__entity(self._numbers)
+
+    @property
+    def sensors(self):
+        return self.__entity(self._sensors)
 
     def power_on(self) -> None:
         self.power = True
@@ -367,6 +382,35 @@ class FanSwingAngleNumber(NumberEntity):
     def set_native_value(self, value: float):
         _LOGGER.error("Swing angle: %s", value)
         self._device.swing_angle = int(value)
+
+    @property
+    def device_info(self):
+        return {"identifiers": {(DOMAIN, self._name.lower().replace(" ", "_"))}}
+    
+# -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- #
+
+from homeassistant.components.sensor import SensorEntity
+
+class FanSpeedRpmSensor(SensorEntity):
+    def __init__(self, fan_device: FanZA5):
+        self._device = fan_device
+        self._name = f"Fan Speed RPM {self._device.name}"
+
+    @property
+    def name(self):
+        return self._name
+
+    @property
+    def native_value(self):
+        return self._device.speed_rpm
+
+    @property
+    def native_unit_of_measurement(self):
+        return "RPM"
+
+    @property
+    def icon(self):
+        return "mdi:fan"
 
     @property
     def device_info(self):
