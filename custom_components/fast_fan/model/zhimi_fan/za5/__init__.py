@@ -53,7 +53,7 @@ class ModelFanZA5:
             self.object.set_property_by(siid=_command.siid, piid=_command.piid, value=value)
             time.sleep(timeout)
 
-            _value = self.__get(siid=_command.siid, piid=_command.piid)
+            _value = self.__get(_command=_command)
             if _value == value:
                 break
 
