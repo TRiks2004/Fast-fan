@@ -40,14 +40,21 @@ class ModelFanZA5:
     def __get(
         self, *, _command: Command
     ) -> (int | float | bool | str):
-        _value = self.object.get_property_by(siid=_command.siid, piid=_command.piid)
-        return _value[0].get('value')
+        _values = self.object.get_property_by(siid=_command.siid, piid=_command.piid)
+        
+        _value = _values[0]
+        _code = _value.get('code')
+
+        if _code is None and _code != 0:
+            raise Exception(f'Error code: {_code}')
+        
+        return _value.get('value')
 
     def __set(
         self, *, _command: Command,
         value: (int | float | bool | str), timeout: int = 1
     ) -> (int | float | bool | str):
-        _value: any
+        _value = value
 
         while True:
             self.object.set_property_by(siid=_command.siid, piid=_command.piid, value=value)
@@ -57,10 +64,10 @@ class ModelFanZA5:
                 _value = self.__get(_command=_command)
                 if _value == value:
                     break
-            except:
+            except Exception as e:
+                _LOGGER.error(e)
                 break
-
-
+            
         return _value
 
     @property
