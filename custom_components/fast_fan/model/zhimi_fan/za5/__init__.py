@@ -11,7 +11,9 @@ from homeassistant.components.number import NumberEntity
 from homeassistant.components.sensor import SensorEntity
 
 from custom_components.fast_fan.const import DOMAIN 
+from custom_components.fast_fan.command import Command
 from .common_fan_za5 import CommonFanZA5
+
 
 _LOGGER = logging.getLogger(__name__)
 
