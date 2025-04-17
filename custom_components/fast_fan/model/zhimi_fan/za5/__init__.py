@@ -34,11 +34,14 @@ class CommonFanZA5:
     class CustomService:
         move = Command(6, 3)           # +
         speed_rpm = Command(6, 4)      # +
-        speed_procent = Command(6, 8)  # TODO Not implemented
+        speed_procent = Command(6, 8)  # +
 
     class Environment:
-        temperature = Command(7, 1)
-        humidity = Command(7, 7)
+        temperature = Command(7, 1) # +
+        humidity = Command(7, 7)    # +
+
+    class PhysicalControlLocked:
+        physical_controls_locked = Command(3, 1)
 
 class ModelFanZA5:
     model='zhimi.fan.za5'
@@ -148,6 +151,14 @@ class ModelFanZA5:
     def speed_procent(self, value: int) -> None:
         self.__set(_command = CommonFanZA5.CustomService.speed_procent, value=value)
 
+    @property
+    def physical_controls_locked(self) -> bool:
+        return self.__get(_command = CommonFanZA5.PhysicalControlLocked.physical_controls_locked)
+    
+    @physical_controls_locked.setter
+    def physical_controls_locked(self, value: bool) -> None:
+        self.__set(_command = CommonFanZA5.PhysicalControlLocked.physical_controls_locked, value=value)
+
     def move(self, value: Literal['left', 'right']) -> None:
         self.__set(_command = CommonFanZA5.CustomService.move, value=value)
 
@@ -162,7 +173,7 @@ class FanZA5(ModelFanZA5):
             self.model.split('.')
         ))
 
-        self._switches = [FanPowerSwitch, FanSwingModeSwitch, FanAnionSwitch]
+        self._switches = [FanPowerSwitch, FanSwingModeSwitch, FanAnionSwitch, FanPyhsicalControlLockedSwitch]
         self._buttons  = [FanMoveLeftButton, FanMoveRightButton]
         self._selects  = [FanSpeedLevelSelect] 
         self._numbers  = [FanSwingAngleNumber, FanSpeedPercentNumber]
@@ -205,6 +216,18 @@ class FanZA5(ModelFanZA5):
     
     def swing_mode_off(self) -> None:
         self.swing_mode = False
+
+    def anion_on(self) -> None:
+        self.anion = True
+
+    def anion_off(self) -> None:
+        self.anion = False
+
+    def physical_controls_locked_on(self) -> None:
+        self.physical_controls_locked = True
+
+    def physical_controls_locked_off(self) -> None:
+        self.physical_controls_locked = False
 
     def move_left(self) -> None:
         self.move('left')
@@ -271,6 +294,7 @@ class FanSwingModeSwitch(SwitchEntity):
         return "mdi:sync" if self.is_on else "mdi:circle-outline"
 
 class FanAnionSwitch(SwitchEntity):
+    
     def __init__(self, fan_device: FanZA5):
         self._device = fan_device
         self._name = f"Fan Anion {self._device.name}"
@@ -284,10 +308,10 @@ class FanAnionSwitch(SwitchEntity):
         return self._device.anion
 
     def turn_on(self):
-        self._device.anion = True
+        self._device.anion_on()
 
     def turn_off(self):
-        self._device.anion = False
+        self._device.anion_off()
 
     @property
     def device_info(self):
@@ -297,6 +321,33 @@ class FanAnionSwitch(SwitchEntity):
     def icon(self):
         return "mdi:blur" if self.is_on else "mdi:blur-off"
 
+class FanPyhsicalControlLockedSwitch(SwitchEntity):
+
+    def __init__(self, fan_device: FanZA5):
+        self._device = fan_device
+        self._name = f"Fan Physical Control Locked {self._device.name}"
+
+    @property
+    def name(self):
+        return self._name
+
+    @property
+    def is_on(self):
+        return self._device.physical_control_locked
+
+    def turn_on(self):
+        self._device.physical_controls_locked_on()
+
+    def turn_off(self):
+        self._device.physical_controls_locked_off()
+
+    @property
+    def device_info(self):
+        return {"identifiers": {(DOMAIN, self._name.lower().replace(" ", "_"))}}
+
+    @property
+    def icon(self):
+        return "mdi:lock" if self.is_on else "mdi:lock-open"
 # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- #
 
 class FanMoveLeftButton(ButtonEntity):
