@@ -256,6 +256,12 @@ class FanZA5(ModelFanZA5):
     def physical_controls_locked_off(self) -> None:
         self.physical_controls_locked = False
 
+    def alarm_on(self) -> None:
+        self.alarm = True
+
+    def alarm_off(self) -> None:
+        self.alarm = False
+
     def move_left(self) -> None:
         self.move('left')
     
