@@ -172,7 +172,7 @@ class ModelFanZA5:
     def brightness(self, value: int) -> None:
         if not (0 <= value <= 100):
             raise ValueError('Brightness must be between 0 and 100')
-        self.__set(_command = CommonFanZA5.CustomService.brightness, value=value)
+        self.__set(_command = CommonFanZA5.IndicatorLight.brightness, value=value)
 
     def move(self, value: Literal['left', 'right']) -> None:
         self.__set(_command = CommonFanZA5.CustomService.move, value=value)
