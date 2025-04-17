@@ -333,7 +333,7 @@ class FanPyhsicalControlLockedSwitch(SwitchEntity):
 
     @property
     def is_on(self):
-        return self._device.physical_control_locked
+        return self._device.physical_controls_locked
 
     def turn_on(self):
         self._device.physical_controls_locked_on()
