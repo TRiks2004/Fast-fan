@@ -1,4 +1,3 @@
-from dataclasses import dataclass
 from typing import Literal
 import logging
 import time
@@ -12,42 +11,9 @@ from homeassistant.components.number import NumberEntity
 from homeassistant.components.sensor import SensorEntity
 
 from custom_components.fast_fan.const import DOMAIN 
+from .common_fan_za5 import CommonFanZA5
 
 _LOGGER = logging.getLogger(__name__)
-
-@dataclass
-class Command:
-    siid: int
-    piid: int
-
-class CommonFanZA5:
-
-    class Fan:
-        power = Command(2, 1)             # +
-        level = Command(2, 2)             # +
-        swing_mode = Command(2, 3)        # +
-        swing_mode_angle = Command(2, 5)  # +
-        mode = Command(2, 7)              # TODO Not implemented
-        power_off_time = Command(2, 10)   # TODO Not implemented
-        anion = Command(2, 11)            # +
-
-    class CustomService:
-        move = Command(6, 3)           # +
-        speed_rpm = Command(6, 4)      # +
-        speed_procent = Command(6, 8)  # +
-
-    class Environment:
-        temperature = Command(7, 1) # +
-        humidity = Command(7, 7)    # +
-
-    class PhysicalControlLocked:
-        physical_controls_locked = Command(3, 1) # +
-
-    class IndicatorLight:
-        brightness = Command(4, 3) # +
-    
-    class Alarm:
-        alarm = Command(5, 1)
 
 # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- #
 
@@ -185,6 +151,10 @@ class ModelFanZA5:
     def alarm(self, value: bool) -> None:
         self.__set(_command = CommonFanZA5.Alarm.alarm, value=value)
 
+    @property
+    def battery_state(self) -> bool:
+        return self.__get(_command = CommonFanZA5.CustomService.battery_state)
+
     def move(self, value: Literal['left', 'right']) -> None:
         self.__set(_command = CommonFanZA5.CustomService.move, value=value)
 
@@ -204,7 +174,7 @@ class FanZA5(ModelFanZA5):
         self._buttons  = [FanMoveLeftButton, FanMoveRightButton]
         self._selects  = [FanSpeedLevelSelect] 
         self._numbers  = [FanSwingAngleNumber, FanSpeedPercentNumber, FanBrightnessNumber]
-        self._sensors  = [FanSpeedRpmSensor, FanTempSensor, FanHumiditySensor]
+        self._sensors  = [FanSpeedRpmSensor, FanTempSensor, FanHumiditySensor, FanBatterySensor]
 
     def __entity(self, entity: list[any]):
         return list(map(
@@ -378,7 +348,7 @@ class FanPyhsicalControlLockedSwitch(SwitchEntity):
 
     @property
     def icon(self):
-        return "mdi:lock" if self.is_on else "mdi:lock-open"
+        return "mdi:lock-outline" if self.is_on else "mdi:lock-open-variant-outline"
 
 class FanAlarmSwitch(SwitchEntity):
 
@@ -669,6 +639,31 @@ class FanHumiditySensor(SensorEntity):
     @property
     def icon(self):
         return "mdi:water-percent"
+
+    @property
+    def device_info(self):
+        return {"identifiers": {(DOMAIN, self._name.lower().replace(" ", "_"))}}
+    
+class FanBatterySensor(SensorEntity):
+    def __init__(self, fan_device: FanZA5):
+        self._device = fan_device
+        self._name = f"Fan Battery State {self._device.name}"
+
+    @property
+    def name(self):
+        return self._name
+
+    @property
+    def native_value(self) -> bool:
+        return self._device.battery_state
+
+    @property
+    def icon(self):
+        return "mdi:battery" if self.native_value else "mdi:battery-off"
+
+    @property
+    def device_class(self):
+        return "battery"
 
     @property
     def device_info(self):
