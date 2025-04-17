@@ -1,7 +1,5 @@
 from __future__ import annotations
-
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType
 
 from .const import DOMAIN
 
