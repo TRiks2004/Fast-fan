@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from typing import Literal
 import logging
 import time
@@ -5,108 +6,103 @@ import time
 from miio import MiotDevice
 from homeassistant.components.switch import SwitchEntity
 from homeassistant.components.button import ButtonEntity
+from homeassistant.components.select import SelectEntity
 
 from custom_components.fast_fan.const import DOMAIN 
 
 _LOGGER = logging.getLogger(__name__)
 
-class FanZA5:
-    model='zhimi.fan.za5'
-    entities_name = 'zhimi fan za5'
-    is_on = False
+@dataclass
+class Command:
+    siid: int
+    piid: int
 
-    def get_entities_switch(self):
-        return [
-            FanPowerSwitch(self.entities_name, self)
-        ]
+class CommonFanZA5:
 
-    def get_entities_button(self):
-        return [
-            FanMoveLeftButton(self.entities_name, self),
-            FanMoveRightButton(self.entities_name, self)
-        ]
+    class Fan:
+        power = Command(2, 1)
+        level = Command(2, 2)
+        swing_mode = Command(2, 3)
+        swing_mode_angle = Command(2, 5)
+        mode = Command(2, 7)
+        power_off_time = Command(2, 10)
+        anion = Command(2, 11)
 
+    class CustomService:
+        move = Command(6, 3)
+        speed_rpm = Command(6, 4)
+        speed_procent = Command(6, 8)
+
+class ModelFanZA5:
     def __init__(self, object: MiotDevice) -> None:
         self.object = object
-        
-        self.is_on = self.get_power()
-
-    def __set(
-        self, 
-        *,
-        siid: int, piid: int,
-        value: int | float | bool | str,        
-        timeout: int = 1
-    ) -> int | float | bool | str:
-        self.object.set_property_by(
-            siid=siid,
-            piid=piid,
-            value=value
-        )
-        time.sleep(timeout)
-        return self.__get(siid=siid, piid=piid)
 
     def __get(
-        self, 
-        *,
-        siid: int, piid: int,
-        timeout: int = 3
-    ) -> int | float | bool | str:
-        get =  self.object.get_property_by(
-            siid=siid,
-            piid=piid
-        )
+        self, *, _command: Command
+    ) -> (int | float | bool | str):
+        _value = self.object.get_property_by(siid=_command.siid, piid=_command.piid)
+        return _value[0].get('value')
 
-        _LOGGER.error(f"get siid:{siid} piid:{piid} status:{get}")
+    def __set(
+        self, *, _command: Command,
+        value: (int | float | bool | str), timeout: int = 1
+    ) -> (int | float | bool | str):
+        _value: any
 
-        return get[0].get('value')
+        while True:
+            self.object.set_property_by(siid=_command.siid, piid=_command.piid, value=value)
+            time.sleep(timeout)
 
-    def get_power(
-        self, 
-        *, 
-        siid: int = 2, piid: int = 1
-    ) -> bool:
-        return self.__get(
-            siid=siid,
-            piid=piid
-        )
+            _value = self.__get(siid=_command.siid, piid=_command.piid)
+            if _value == value:
+                break
 
-    def __set_power(self, 
-        value: bool, 
-        *, 
-        siid: int = 2, piid: int = 1
-    ) -> bool:
-        self.is_on = self.__set(
-            siid=siid,
-            piid=piid,
-            value=value
-        )
+        return _value
 
-        return self.is_on
+    @property
+    def power(self) -> bool: 
+        return self.__get(_command = CommonFanZA5.Fan.power)
 
-    def set_power_on(self) -> bool:
-        return self.__set_power(value=True)
+    @power.setter
+    def power(self, value: bool) -> None: 
+        self.__set(_command = CommonFanZA5.Fan.power, value=value)
 
-    def set_power_off(self) -> bool:
-        return self.__set_power(value=False)
+    def move(self, value: Literal['left', 'right']) -> None:
+        self.__set(_command = CommonFanZA5.CustomService.move, value=value)
 
-    def _move(self, 
-        value: Literal['left', 'right'], *, 
-        siid: int = 6, piid: int = 3
-    ) -> None:
-        self.__set(value=value, siid=siid, piid=piid)
+class FanZA5(ModelFanZA5):
+    model='zhimi.fan.za5'
+    
+    def __init__(self, object: MiotDevice) -> None:
+        super().__init__(object=object)
+        
+        self.name = ' '.join(map(
+            lambda x: x[0].upper() + x[1:],
+            self.model.split('.')
+        ))
 
-    def set_move_left(self) -> None:
+        self.switches = [FanPowerSwitch(self)]
+        # FanMoveLeftButton(self), FanMoveRightButton(self)
+        self.buttons  = []
+
+    def power_on(self) -> None:
+        self.power(value=True)
+
+    def power_off(self) -> None:
+        self.power(value=False)
+
+    def move_left(self) -> None:
         self._move('left')
     
-    def set_move_right(self) -> None:
+    def move_right(self) -> None:
         self._move('right')
 
+# -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- #
+
 class FanPowerSwitch(SwitchEntity):
-    def __init__(self, id, fan_device: FanZA5):
-        self._id = id
+    def __init__(self, fan_device: FanZA5):
         self._device = fan_device
-        self._name = f"Fan Power {self._id}"
+        self._name = f"Fan Power {self._device.name}"
 
     @property
     def name(self):
@@ -114,13 +110,13 @@ class FanPowerSwitch(SwitchEntity):
 
     @property
     def is_on(self):
-        return self._device.is_on
+        return self._device.power
 
     def turn_on(self):
-        self._device.set_power_on()
+        self._device.power_on()
 
     def turn_off(self):
-        self._device.set_power_off()
+        self._device.power_off()
 
     @property
     def device_info(self):
@@ -129,67 +125,86 @@ class FanPowerSwitch(SwitchEntity):
     @property
     def icon(self):
         # меняем иконку в зависимости от состояния вентилятора
-        if self._device.is_on:
+        if self.is_on:
             return "mdi:fan"  # вентилятор включён
         else:
             return "mdi:fan-off"  # вентилятор выключен
 
+# -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- #
 
-class FanMoveLeftButton(ButtonEntity):
+# class FanMoveLeftButton(ButtonEntity):
 
-    def __init__(self, id, fan_device: FanZA5):
-        self._id = id
-        self._device = fan_device
-        self._name = f"Fan Move Left {self._id}"
+#     def __init__(self, fan_device: FanZA5):
+#         self._device = fan_device
+#         self._name = f"Fan Move Left {self._device.name}"
 
-    @property
-    def name(self):
-        return self._name
+#     @property
+#     def name(self):
+#         return self._name
 
-    @property
-    def enabled(self):
-        return self._device.is_on
+#     @property
+#     def enabled(self):
+#         return self._device.is_on
 
-    def press(self):
-        self._device.set_move_left()
+#     def press(self):
+#         self._device.set_move_left()
 
-    def release(self):
-        pass
+#     def release(self):
+#         pass
 
-    @property
-    def device_info(self):
-        return {"identifiers": {(DOMAIN, self._name.lower().replace(" ", "_"))}}
+#     @property
+#     def device_info(self):
+#         return {"identifiers": {(DOMAIN, self._name.lower().replace(" ", "_"))}}
 
-    @property
-    def icon(self):
-        return "mdi:arrow-left"
+#     @property
+#     def icon(self):
+#         return "mdi:arrow-left"
 
+# class FanMoveRightButton(ButtonEntity):
 
-class FanMoveRightButton(ButtonEntity):
+#     def __init__(self, fan_device: FanZA5):
+#         self._device = fan_device
+#         self._name = f"Fan Move Right {self._device.name}"
 
-    def __init__(self, id, fan_device: FanZA5):
-        self._id = id
-        self._device = fan_device
-        self._name = f"Fan Move Right {self._id}"
+#     @property
+#     def name(self):
+#         return self._name
 
-    @property
-    def name(self):
-        return self._name
+#     @property
+#     def enabled(self):
+#         return self._device.is_on
 
-    @property
-    def enabled(self):
-        return self._device.is_on
+#     def press(self):
+#         self._device.set_move_right()
 
-    def press(self):
-        self._device.set_move_right()
+#     def release(self):
+#         pass
 
-    def release(self):
-        pass
+#     @property
+#     def device_info(self):
+#         return {"identifiers": {(DOMAIN, self._name.lower().replace(" ", "_"))}}
 
-    @property
-    def device_info(self):
-        return {"identifiers": {(DOMAIN, self._name.lower().replace(" ", "_"))}}
+#     @property
+#     def icon(self):
+#         return "mdi:arrow-right"
 
-    @property
-    def icon(self):
-        return "mdi:arrow-right"
+# # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- #
+
+# class FanSpeedSelect(SelectEntity):
+    
+    # def __init__(self, fan_device):
+    #     self._fan_device = fan_device
+    #     self._name = f"Fan Speed Level {fan_device.name}"
+    #     self._options = ["Слабый", "Средний", "Быстрый", "Максимальный"]
+    
+    # @property
+    # def name(self) -> str:
+    #     return self._name
+    
+    # @property
+    # def options(self) -> list:
+    #     return self._options
+    
+    # @property
+    # def current_option(self) -> str:
+    #     return self._fan_device.get_speed()
