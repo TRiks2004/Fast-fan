@@ -31,8 +31,12 @@ class CommonFanZA5:
 
     class CustomService:
         move = Command(6, 3)           # +
-        speed_rpm = Command(6, 4)      # TODO Not implemented
+        speed_rpm = Command(6, 4)      # +
         speed_procent = Command(6, 8)  # TODO Not implemented
+
+    class Environment:
+        temperature = Command(7, 1)
+        humidity = Command(7, 7)
 
 class ModelFanZA5:
     model='zhimi.fan.za5'
@@ -41,8 +45,6 @@ class ModelFanZA5:
 
     min_angle = 30
     max_angle = 120
-
-
 
     def __init__(self, object: MiotDevice) -> None:
         self.object = object
@@ -128,6 +130,14 @@ class ModelFanZA5:
     def anion(self, value: bool) -> None:
         self.__set(_command = CommonFanZA5.Fan.anion, value=value)
 
+    @property
+    def temperature(self) -> int:
+        return self.__get(_command = CommonFanZA5.Environment.temperature)
+    
+    @property
+    def humidity(self) -> int:
+        return self.__get(_command = CommonFanZA5.Environment.humidity)
+
     def move(self, value: Literal['left', 'right']) -> None:
         self.__set(_command = CommonFanZA5.CustomService.move, value=value)
 
@@ -146,7 +156,7 @@ class FanZA5(ModelFanZA5):
         self._buttons  = [FanMoveLeftButton, FanMoveRightButton]
         self._selects  = [FanSpeedLevelSelect] 
         self._numbers  = [FanSwingAngleNumber]
-        self._sensors  = [FanSpeedRpmSensor]
+        self._sensors  = [FanSpeedRpmSensor, FanTempSensor, FanHumiditySensor]
 
     def __entity(self, entity: list[any]):
         return list(map(
@@ -411,6 +421,56 @@ class FanSpeedRpmSensor(SensorEntity):
     @property
     def icon(self):
         return "mdi:fan"
+
+    @property
+    def device_info(self):
+        return {"identifiers": {(DOMAIN, self._name.lower().replace(" ", "_"))}}
+
+class FanTempSensor(SensorEntity):
+    def __init__(self, fan_device: FanZA5):
+        self._device = fan_device
+        self._name = f"Fan Temp {self._device.name}"
+
+    @property
+    def name(self):
+        return self._name
+
+    @property
+    def native_value(self):
+        return self._device.temp
+
+    @property
+    def native_unit_of_measurement(self):
+        return "°C"
+
+    @property
+    def icon(self):
+        return "mdi:thermometer"
+
+    @property
+    def device_info(self):
+        return {"identifiers": {(DOMAIN, self._name.lower().replace(" ", "_"))}}
+    
+class FanHumiditySensor(SensorEntity):
+    def __init__(self, fan_device: FanZA5):
+        self._device = fan_device
+        self._name = f"Fan Humidity {self._device.name}"
+
+    @property
+    def name(self):
+        return self._name
+
+    @property
+    def native_value(self):
+        return self._device.humidity
+
+    @property
+    def native_unit_of_measurement(self):
+        return "%"
+
+    @property
+    def icon(self):
+        return "mdi:water-percent"
 
     @property
     def device_info(self):
