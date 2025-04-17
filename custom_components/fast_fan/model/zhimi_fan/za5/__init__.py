@@ -7,6 +7,7 @@ from miio import MiotDevice
 from homeassistant.components.switch import SwitchEntity
 from homeassistant.components.button import ButtonEntity
 from homeassistant.components.select import SelectEntity
+from homeassistant.components.number import NumberEntity
 
 from custom_components.fast_fan.const import DOMAIN 
 
@@ -20,18 +21,18 @@ class Command:
 class CommonFanZA5:
 
     class Fan:
-        power = Command(2, 1) # +
-        level = Command(2, 2)
-        swing_mode = Command(2, 3)
-        swing_mode_angle = Command(2, 5)
-        mode = Command(2, 7)
-        power_off_time = Command(2, 10)
-        anion = Command(2, 11)
+        power = Command(2, 1)             # +
+        level = Command(2, 2)             # +
+        swing_mode = Command(2, 3)        # +
+        swing_mode_angle = Command(2, 5)  # TODO Not implemented
+        mode = Command(2, 7)              # TODO Not implemented
+        power_off_time = Command(2, 10)   # TODO Not implemented
+        anion = Command(2, 11)            # TODO Not implemented
 
     class CustomService:
-        move = Command(6, 3) # +
-        speed_rpm = Command(6, 4)
-        speed_procent = Command(6, 8)
+        move = Command(6, 3)           # +
+        speed_rpm = Command(6, 4)      # TODO Not implemented
+        speed_procent = Command(6, 8)  # TODO Not implemented
 
 class ModelFanZA5:
     def __init__(self, object: MiotDevice) -> None:
@@ -95,6 +96,14 @@ class ModelFanZA5:
     def swing_mode(self, value: bool) -> None:
         self.__set(_command = CommonFanZA5.Fan.swing_mode, value=value)
 
+    @property
+    def swing_angle(self) -> int:
+        return self.__get(_command = CommonFanZA5.Fan.swing_mode_angle)
+    
+    @swing_angle.setter
+    def swing_angle(self, value: int) -> None:
+        self.__set(_command = CommonFanZA5.Fan.swing_mode_angle, value=value)
+
     def move(self, value: Literal['left', 'right']) -> None:
         self.__set(_command = CommonFanZA5.CustomService.move, value=value)
 
@@ -112,9 +121,32 @@ class FanZA5(ModelFanZA5):
             self.model.split('.')
         ))
 
-        self.switches = [FanPowerSwitch(self), FanSwingModeSwitch(self)]
-        self.buttons  = [FanMoveLeftButton(self), FanMoveRightButton(self)]
-        self.selects  = [FanSpeedLevelSelect(self)] 
+        self._switches = [FanPowerSwitch, FanSwingModeSwitch]
+        self._buttons  = [FanMoveLeftButton, FanMoveRightButton]
+        self._selects  = [FanSpeedLevelSelect] 
+        self._numbers  = [FanSwingAngleNumber]
+
+    def __entity(self, entity: list[any]):
+        return list(map(
+            lambda x: x(self),
+            entity
+        ))
+
+    @property
+    def switches(self):
+        return self.__entity(self._switches)
+
+    @property
+    def buttons(self):
+        return self.__entity(self._buttons)
+
+    @property
+    def selects(self):
+        return self.__entity(self._selects)
+
+    @property
+    def numbers(self):
+        return self.__entity(self._numbers)
 
     def power_on(self) -> None:
         self.power = True
@@ -239,7 +271,7 @@ class FanMoveRightButton(ButtonEntity):
     def icon(self):
         return "mdi:arrow-right"
 
-# # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- #
+# -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- #
 
 class FanSpeedLevelSelect(SelectEntity):
     
@@ -263,4 +295,40 @@ class FanSpeedLevelSelect(SelectEntity):
     def select_option(self, option: str) -> None:
         self._device.level = int(option)
 
+# -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- #
+
+class FanSwingAngleNumber(NumberEntity):
+    def __init__(self, fan_device: FanZA5):
+        self._device = fan_device
+        self._name = f"Fan Swing Angle {self._device.name}"
     
+    @property
+    def name(self):
+        return self._name
+    
+    @property
+    def native_value(self):
+        return self._device.swing_angle
+    
+    @property
+    def native_min_value(self):
+        return 30
+
+    @property
+    def native_max_value(self):
+        return 120
+    
+    @property
+    def native_step(self):
+        return 1
+    
+    @property
+    def icon(self):
+        return "mdi:arrow-left-right-bold"
+    
+    def set_native_value(self, value: float):
+        self._device.swing_mode_angle = int(value)
+
+    @property
+    def device_info(self):
+        return {"identifiers": {(DOMAIN, self._name.lower().replace(" ", "_"))}}
