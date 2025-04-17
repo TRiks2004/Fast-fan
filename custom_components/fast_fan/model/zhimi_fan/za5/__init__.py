@@ -43,8 +43,10 @@ class CommonFanZA5:
     class PhysicalControlLocked:
         physical_controls_locked = Command(3, 1) # +
 
-    class IndicatorLightCommand:
+    class IndicatorLight:
         brightness = Command(4, 3)
+
+# -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- #
 
 class ModelFanZA5:
     model='zhimi.fan.za5'
@@ -164,7 +166,7 @@ class ModelFanZA5:
 
     @property
     def brightness(self) -> int:
-        return self.__get(_command = CommonFanZA5.CustomService.brightness)
+        return self.__get(_command = CommonFanZA5.IndicatorLight.brightness)
     
     @brightness.setter
     def brightness(self, value: int) -> None:
@@ -175,6 +177,7 @@ class ModelFanZA5:
     def move(self, value: Literal['left', 'right']) -> None:
         self.__set(_command = CommonFanZA5.CustomService.move, value=value)
 
+# -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- #
 
 class FanZA5(ModelFanZA5):
 
