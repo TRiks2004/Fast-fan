@@ -62,6 +62,7 @@ class ModelFanZA5:
 
             try:
                 _value = self.__get(_command=_command)
+                _LOGGER.error(_value)
                 if _value == value:
                     break
             except Exception as e:
