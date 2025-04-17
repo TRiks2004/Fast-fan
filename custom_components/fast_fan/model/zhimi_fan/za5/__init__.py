@@ -331,7 +331,7 @@ class FanSwingAngleNumber(NumberEntity):
     
     def set_native_value(self, value: float):
         _LOGGER.error("Swing angle: %s", value)
-        self._device.swing_mode_angle = int(value)
+        self._device.swing_angle = int(value)
 
     @property
     def device_info(self):
