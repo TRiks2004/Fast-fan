@@ -102,7 +102,7 @@ class ModelFanZA5:
     
     @swing_angle.setter
     def swing_angle(self, value: int) -> None:
-        if not (30 >= value <= 120):
+        if not (30 <= value <= 120):
             raise ValueError('Angle must be between 30 and 120 degrees')
         
         self.__set(_command = CommonFanZA5.Fan.swing_mode_angle, value=value)
