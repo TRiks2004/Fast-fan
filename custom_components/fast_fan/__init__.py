@@ -7,7 +7,7 @@ from .const import DOMAIN
 import logging
 _LOGGER = logging.getLogger(__name__)
 
-PLATFORMS: list[str] = ["switch", "button"]
+PLATFORMS: list[str] = ["switch", "button", "select"]
 
 async def async_setup_entry(
     hass: HomeAssistant, 

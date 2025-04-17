@@ -20,7 +20,7 @@ class Command:
 class CommonFanZA5:
 
     class Fan:
-        power = Command(2, 1)
+        power = Command(2, 1) # +
         level = Command(2, 2)
         swing_mode = Command(2, 3)
         swing_mode_angle = Command(2, 5)
@@ -29,7 +29,7 @@ class CommonFanZA5:
         anion = Command(2, 11)
 
     class CustomService:
-        move = Command(6, 3)
+        move = Command(6, 3) # +
         speed_rpm = Command(6, 4)
         speed_procent = Command(6, 8)
 
@@ -44,8 +44,6 @@ class ModelFanZA5:
         
         _value = _values[0]
         _code = _value.get('code')
-        
-        _LOGGER.error(_code) # TODO: remove
         
         if _code is None or _code != 0:
             raise Exception(f'Error code: {_code}')
@@ -81,12 +79,23 @@ class ModelFanZA5:
     def power(self, value: bool) -> None: 
         self.__set(_command = CommonFanZA5.Fan.power, value=value)
 
+    @property
+    def level(self) -> int: 
+        return self.__get(_command = CommonFanZA5.Fan.level)
+
+    @level.setter
+    def level(self, value: int) -> None: 
+        self.__set(_command = CommonFanZA5.Fan.level, value=value)
+
     def move(self, value: Literal['left', 'right']) -> None:
         self.__set(_command = CommonFanZA5.CustomService.move, value=value)
+
 
 class FanZA5(ModelFanZA5):
     model='zhimi.fan.za5'
     
+    lavels = [1, 2, 3, 4]
+
     def __init__(self, object: MiotDevice) -> None:
         super().__init__(object=object)
         
@@ -97,6 +106,7 @@ class FanZA5(ModelFanZA5):
 
         self.switches = [FanPowerSwitch(self)]
         self.buttons  = [FanMoveLeftButton(self), FanMoveRightButton(self)]
+        self.selects  = [FanSpeedLevelSelect(self)] 
 
     def power_on(self) -> None:
         self.power = True
@@ -109,6 +119,8 @@ class FanZA5(ModelFanZA5):
     
     def move_right(self) -> None:
         self.move('right')
+
+    
 
 # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- #
 
@@ -191,21 +203,26 @@ class FanMoveRightButton(ButtonEntity):
 
 # # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- #
 
-# class FanSpeedSelect(SelectEntity):
+class FanSpeedLevelSelect(SelectEntity):
     
-    # def __init__(self, fan_device):
-    #     self._fan_device = fan_device
-    #     self._name = f"Fan Speed Level {fan_device.name}"
-    #     self._options = ["Слабый", "Средний", "Быстрый", "Максимальный"]
+    def __init__(self, fan_device: FanZA5):
+        self._device = fan_device
+        self._name = f"Fan Speed Level {self._device.name}"
+        self._options = list(map(str, self._device.lavels))
     
-    # @property
-    # def name(self) -> str:
-    #     return self._name
+    @property
+    def name(self) -> str:
+        return self._name
     
-    # @property
-    # def options(self) -> list:
-    #     return self._options
+    @property
+    def options(self) -> list:
+        return self._options
     
-    # @property
-    # def current_option(self) -> str:
-    #     return self._fan_device.get_speed()
+    @property
+    def current_option(self) -> str:
+        return str(self._device.level)
+    
+    def select_option(self, option: str) -> None:
+        self._device.level = int(option)
+
+    
