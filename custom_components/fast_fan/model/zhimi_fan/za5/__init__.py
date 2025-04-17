@@ -4,10 +4,12 @@ import logging
 import time
 
 from miio import MiotDevice
+
 from homeassistant.components.switch import SwitchEntity
 from homeassistant.components.button import ButtonEntity
 from homeassistant.components.select import SelectEntity
 from homeassistant.components.number import NumberEntity
+from homeassistant.components.sensor import SensorEntity
 
 from custom_components.fast_fan.const import DOMAIN 
 
@@ -27,7 +29,7 @@ class CommonFanZA5:
         swing_mode_angle = Command(2, 5)  # +
         mode = Command(2, 7)              # TODO Not implemented
         power_off_time = Command(2, 10)   # TODO Not implemented
-        anion = Command(2, 11)            # TODO Not implemented
+        anion = Command(2, 11)            # +
 
     class CustomService:
         move = Command(6, 3)           # +
@@ -138,6 +140,14 @@ class ModelFanZA5:
     def humidity(self) -> int:
         return self.__get(_command = CommonFanZA5.Environment.humidity)
 
+    @property
+    def speed_procent(self) -> int:
+        return self.__get(_command = CommonFanZA5.CustomService.speed_procent)
+    
+    @speed_procent.setter
+    def speed_procent(self, value: int) -> None:
+        self.__set(_command = CommonFanZA5.CustomService.speed_procent, value=value)
+
     def move(self, value: Literal['left', 'right']) -> None:
         self.__set(_command = CommonFanZA5.CustomService.move, value=value)
 
@@ -155,7 +165,7 @@ class FanZA5(ModelFanZA5):
         self._switches = [FanPowerSwitch, FanSwingModeSwitch, FanAnionSwitch]
         self._buttons  = [FanMoveLeftButton, FanMoveRightButton]
         self._selects  = [FanSpeedLevelSelect] 
-        self._numbers  = [FanSwingAngleNumber]
+        self._numbers  = [FanSwingAngleNumber, FanSpeedPercentNumber]
         self._sensors  = [FanSpeedRpmSensor, FanTempSensor, FanHumiditySensor]
 
     def __entity(self, entity: list[any]):
@@ -396,10 +406,44 @@ class FanSwingAngleNumber(NumberEntity):
     @property
     def device_info(self):
         return {"identifiers": {(DOMAIN, self._name.lower().replace(" ", "_"))}}
-    
-# -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- #
 
-from homeassistant.components.sensor import SensorEntity
+class FanSpeedPercentNumber(NumberEntity):
+    def __init__(self, fan_device: FanZA5):
+        self._device = fan_device
+        self._name = f"Fan Speed Control % {self._device.name}"
+
+    @property
+    def name(self):
+        return self._name
+
+    @property
+    def native_value(self):
+        return self._device.speed_procent
+
+    def set_native_value(self, value: float):
+        self._device.speed_procent = int(value)
+
+    @property
+    def native_unit_of_measurement(self):
+        return "%"
+
+    @property
+    def native_min_value(self):
+        return 0
+
+    @property
+    def native_max_value(self):
+        return 100
+
+    @property
+    def icon(self):
+        return "mdi:speedometer-medium"
+
+    @property
+    def device_info(self):
+        return {"identifiers": {(DOMAIN, self._name.lower().replace(" ", "_"))}}
+
+# -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- #
 
 class FanSpeedRpmSensor(SensorEntity):
     def __init__(self, fan_device: FanZA5):
