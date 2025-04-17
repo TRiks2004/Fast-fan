@@ -86,10 +86,10 @@ class FanZA5(ModelFanZA5):
         self.buttons  = []
 
     def power_on(self) -> None:
-        self.power(value=True)
+        self.power = True
 
     def power_off(self) -> None:
-        self.power(value=False)
+        self.power = False
 
     def move_left(self) -> None:
         self._move('left')
