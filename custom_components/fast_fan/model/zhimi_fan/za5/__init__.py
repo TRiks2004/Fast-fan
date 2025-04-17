@@ -44,7 +44,9 @@ class ModelFanZA5:
         
         _value = _values[0]
         _code = _value.get('code')
-
+        
+        _LOGGER.error(_value) # TODO: remove
+        
         if _code is None and _code != 0:
             raise Exception(f'Error code: {_code}')
         
@@ -62,7 +64,7 @@ class ModelFanZA5:
 
             try:
                 _value = self.__get(_command=_command)
-                _LOGGER.error(_value)
+               
                 if _value == value:
                     break
             except Exception as e:
