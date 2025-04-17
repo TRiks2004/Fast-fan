@@ -1,6 +1,6 @@
 {
-    "domain": "fan_fast",
-    "name": "Fan",
+    "domain": "fast_fan",
+    "name": "fast_fan",
     "version": "0.0.2",
     "config_flow": true,
     "codeowners": [],
