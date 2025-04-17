@@ -87,6 +87,14 @@ class ModelFanZA5:
     def level(self, value: int) -> None: 
         self.__set(_command = CommonFanZA5.Fan.level, value=value)
 
+    @property
+    def swing_mode(self) -> bool:
+        return self.__get(_command = CommonFanZA5.Fan.swing_mode)
+    
+    @swing_mode.setter
+    def swing_mode(self, value: bool) -> None:
+        self.__set(_command = CommonFanZA5.Fan.swing_mode, value=value)
+
     def move(self, value: Literal['left', 'right']) -> None:
         self.__set(_command = CommonFanZA5.CustomService.move, value=value)
 
@@ -104,7 +112,7 @@ class FanZA5(ModelFanZA5):
             self.model.split('.')
         ))
 
-        self.switches = [FanPowerSwitch(self)]
+        self.switches = [FanPowerSwitch(self), FanSwingModeSwitch(self)]
         self.buttons  = [FanMoveLeftButton(self), FanMoveRightButton(self)]
         self.selects  = [FanSpeedLevelSelect(self)] 
 
@@ -113,6 +121,12 @@ class FanZA5(ModelFanZA5):
 
     def power_off(self) -> None:
         self.power = False
+
+    def swing_mode_on(self) -> None:
+        self.swing_mode = True
+    
+    def swing_mode_off(self) -> None:
+        self.swing_mode = False
 
     def move_left(self) -> None:
         self.move('left')
@@ -149,10 +163,34 @@ class FanPowerSwitch(SwitchEntity):
 
     @property
     def icon(self):
-        if self.is_on:
-            return "mdi:fan"
-        else:
-            return "mdi:fan-off"
+        return "mdi:fan" if self.is_on else "mdi:fan-off"
+
+class FanSwingModeSwitch(SwitchEntity):
+    def __init__(self, fan_device: FanZA5):
+        self._device = fan_device
+        self._name = f"Fan Swing Mode {self._device.name}"
+
+    @property
+    def name(self):
+        return self._name
+
+    @property
+    def is_on(self):
+        return self._device.swing_mode
+
+    def turn_on(self):
+        self._device.swing_mode_on()
+
+    def turn_off(self):
+        self._device.swing_mode_off()
+
+    @property
+    def device_info(self):
+        return {"identifiers": {(DOMAIN, self._name.lower().replace(" ", "_"))}}
+
+    @property
+    def icon(self):
+        return "mdi:sync" if self.is_on else "mdi:circle-outline"
 
 # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- #
 
