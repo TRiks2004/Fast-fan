@@ -1,0 +1,12 @@
+{
+    "domain": "fan",
+    "name": "Fan",
+    "version": "0.0.1",
+    "config_flow": true,
+    "codeowners": [],
+    "dependencies": [],
+    "documentation": "https://www.example.com",
+    "integration_type": "hub",
+    "iot_class": "local_polling",
+    "requirements": []
+  }
