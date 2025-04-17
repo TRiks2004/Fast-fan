@@ -6,7 +6,7 @@ from miio import MiotDevice
 from homeassistant.components.switch import SwitchEntity
 from homeassistant.components.button import ButtonEntity
 
-from custom_components.fan.const import DOMAIN 
+from custom_components.fast_fan.const import DOMAIN 
 
 _LOGGER = logging.getLogger(__name__)
 
