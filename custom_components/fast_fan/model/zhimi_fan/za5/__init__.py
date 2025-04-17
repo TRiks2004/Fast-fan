@@ -189,7 +189,7 @@ class FanZA5(ModelFanZA5):
         self._switches = [FanPowerSwitch, FanSwingModeSwitch, FanAnionSwitch, FanPyhsicalControlLockedSwitch]
         self._buttons  = [FanMoveLeftButton, FanMoveRightButton]
         self._selects  = [FanSpeedLevelSelect] 
-        self._numbers  = [FanSwingAngleNumber, FanSpeedPercentNumber]
+        self._numbers  = [FanSwingAngleNumber, FanSpeedPercentNumber, FanBrightnessNumber]
         self._sensors  = [FanSpeedRpmSensor, FanTempSensor, FanHumiditySensor]
 
     def __entity(self, entity: list[any]):
