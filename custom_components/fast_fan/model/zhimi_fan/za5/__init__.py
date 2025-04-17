@@ -41,7 +41,10 @@ class CommonFanZA5:
         humidity = Command(7, 7)    # +
 
     class PhysicalControlLocked:
-        physical_controls_locked = Command(3, 1)
+        physical_controls_locked = Command(3, 1) # +
+
+    class IndicatorLightCommand:
+        brightness = Command(4, 3)
 
 class ModelFanZA5:
     model='zhimi.fan.za5'
@@ -159,6 +162,16 @@ class ModelFanZA5:
     def physical_controls_locked(self, value: bool) -> None:
         self.__set(_command = CommonFanZA5.PhysicalControlLocked.physical_controls_locked, value=value)
 
+    @property
+    def brightness(self) -> int:
+        return self.__get(_command = CommonFanZA5.CustomService.brightness)
+    
+    @brightness.setter
+    def brightness(self, value: int) -> None:
+        if not (0 <= value <= 100):
+            raise ValueError('Brightness must be between 0 and 100')
+        self.__set(_command = CommonFanZA5.CustomService.brightness, value=value)
+
     def move(self, value: Literal['left', 'right']) -> None:
         self.__set(_command = CommonFanZA5.CustomService.move, value=value)
 
@@ -234,8 +247,6 @@ class FanZA5(ModelFanZA5):
     
     def move_right(self) -> None:
         self.move('right')
-
-    
 
 # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- #
 
@@ -348,6 +359,7 @@ class FanPyhsicalControlLockedSwitch(SwitchEntity):
     @property
     def icon(self):
         return "mdi:lock" if self.is_on else "mdi:lock-open"
+
 # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- #
 
 class FanMoveLeftButton(ButtonEntity):
@@ -490,6 +502,49 @@ class FanSpeedPercentNumber(NumberEntity):
     def icon(self):
         return "mdi:speedometer-medium"
 
+    @property
+    def device_info(self):
+        return {"identifiers": {(DOMAIN, self._name.lower().replace(" ", "_"))}}
+
+class FanBrightnessNumber(NumberEntity):
+    def __init__(self, fan_device: FanZA5):
+        self._device = fan_device
+        self._name = f"Fan Brightness {self._device.name}"
+
+    @property
+    def name(self):
+        return self._name
+
+    @property
+    def native_value(self):
+        return self._device.brightness
+
+    def set_native_value(self, value: float):
+        self._device.brightness = int(value)
+
+    @property
+    def native_unit_of_measurement(self):
+        return "%"
+
+    @property
+    def native_min_value(self):
+        return 0
+
+    @property
+    def native_max_value(self):
+        return 100
+
+    @property
+    def icon(self):
+        match value := self.native_value:
+            case 0:
+                return "mdi:lightbulb-off"
+            case 100:
+                return "mdi:lightbulb-on"
+            case _:
+                _value = min(90, max(10, round(value / 10) * 10))
+                return f"mdi:lightbulb-on-{_value}"
+            
     @property
     def device_info(self):
         return {"identifiers": {(DOMAIN, self._name.lower().replace(" ", "_"))}}
