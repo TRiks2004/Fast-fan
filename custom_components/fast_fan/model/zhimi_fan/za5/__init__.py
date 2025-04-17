@@ -53,9 +53,13 @@ class ModelFanZA5:
             self.object.set_property_by(siid=_command.siid, piid=_command.piid, value=value)
             time.sleep(timeout)
 
-            _value = self.__get(_command=_command)
-            if _value == value:
+            try:
+                _value = self.__get(_command=_command)
+                if _value == value:
+                    break
+            except:
                 break
+
 
         return _value
 
