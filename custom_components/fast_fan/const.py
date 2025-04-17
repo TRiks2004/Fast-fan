@@ -1,1 +1,1 @@
-DOMAIN = "fan"
+DOMAIN = "fast_fan"
