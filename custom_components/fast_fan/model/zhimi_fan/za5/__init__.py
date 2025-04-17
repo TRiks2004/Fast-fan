@@ -45,9 +45,9 @@ class ModelFanZA5:
         _value = _values[0]
         _code = _value.get('code')
         
-        _LOGGER.error(_value) # TODO: remove
+        _LOGGER.error(_code) # TODO: remove
         
-        if _code is None and _code != 0:
+        if _code is None or _code != 0:
             raise Exception(f'Error code: {_code}')
         
         return _value.get('value')
