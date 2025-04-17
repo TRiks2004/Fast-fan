@@ -82,8 +82,7 @@ class FanZA5(ModelFanZA5):
         ))
 
         self.switches = [FanPowerSwitch(self)]
-        # FanMoveLeftButton(self), FanMoveRightButton(self)
-        self.buttons  = []
+        self.buttons  = [FanMoveLeftButton(self), FanMoveRightButton(self)]
 
     def power_on(self) -> None:
         self.power = True
@@ -92,10 +91,10 @@ class FanZA5(ModelFanZA5):
         self.power = False
 
     def move_left(self) -> None:
-        self._move('left')
+        self.move('left')
     
     def move_right(self) -> None:
-        self._move('right')
+        self.move('right')
 
 # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- #
 
@@ -124,69 +123,57 @@ class FanPowerSwitch(SwitchEntity):
 
     @property
     def icon(self):
-        # меняем иконку в зависимости от состояния вентилятора
         if self.is_on:
-            return "mdi:fan"  # вентилятор включён
+            return "mdi:fan"
         else:
-            return "mdi:fan-off"  # вентилятор выключен
+            return "mdi:fan-off"
 
 # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- #
 
-# class FanMoveLeftButton(ButtonEntity):
+class FanMoveLeftButton(ButtonEntity):
 
-#     def __init__(self, fan_device: FanZA5):
-#         self._device = fan_device
-#         self._name = f"Fan Move Left {self._device.name}"
+    def __init__(self, fan_device: FanZA5):
+        self._device = fan_device
+        self._name = f"Fan Move Left {self._device.name}"
 
-#     @property
-#     def name(self):
-#         return self._name
+    @property
+    def name(self):
+        return self._name
 
-#     @property
-#     def enabled(self):
-#         return self._device.is_on
+    def press(self):
+        self._device.move_left()
 
-#     def press(self):
-#         self._device.set_move_left()
+    @property
+    def device_info(self):
+        return {"identifiers": {(DOMAIN, self._name.lower().replace(" ", "_"))}}
 
-#     def release(self):
-#         pass
+    @property
+    def icon(self):
+        return "mdi:arrow-left"
 
-#     @property
-#     def device_info(self):
-#         return {"identifiers": {(DOMAIN, self._name.lower().replace(" ", "_"))}}
+class FanMoveRightButton(ButtonEntity):
 
-#     @property
-#     def icon(self):
-#         return "mdi:arrow-left"
+    def __init__(self, fan_device: FanZA5):
+        self._device = fan_device
+        self._name = f"Fan Move Right {self._device.name}"
 
-# class FanMoveRightButton(ButtonEntity):
+    @property
+    def name(self):
+        return self._name
 
-#     def __init__(self, fan_device: FanZA5):
-#         self._device = fan_device
-#         self._name = f"Fan Move Right {self._device.name}"
+    def press(self):
+        self._device.move_right()
 
-#     @property
-#     def name(self):
-#         return self._name
+    def release(self):
+        pass
 
-#     @property
-#     def enabled(self):
-#         return self._device.is_on
+    @property
+    def device_info(self):
+        return {"identifiers": {(DOMAIN, self._name.lower().replace(" ", "_"))}}
 
-#     def press(self):
-#         self._device.set_move_right()
-
-#     def release(self):
-#         pass
-
-#     @property
-#     def device_info(self):
-#         return {"identifiers": {(DOMAIN, self._name.lower().replace(" ", "_"))}}
-
-#     @property
-#     def icon(self):
-#         return "mdi:arrow-right"
+    @property
+    def icon(self):
+        return "mdi:arrow-right"
 
 # # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- #
 
