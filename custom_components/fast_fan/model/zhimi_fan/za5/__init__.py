@@ -44,7 +44,10 @@ class CommonFanZA5:
         physical_controls_locked = Command(3, 1) # +
 
     class IndicatorLight:
-        brightness = Command(4, 3)
+        brightness = Command(4, 3) # +
+    
+    class Alarm:
+        alarm = Command(5, 1)
 
 # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- #
 
@@ -174,6 +177,14 @@ class ModelFanZA5:
             raise ValueError('Brightness must be between 0 and 100')
         self.__set(_command = CommonFanZA5.IndicatorLight.brightness, value=value)
 
+    @property
+    def alarm(self) -> bool:
+        return self.__get(_command = CommonFanZA5.Alarm.alarm)
+    
+    @alarm.setter
+    def alarm(self, value: bool) -> None:
+        self.__set(_command = CommonFanZA5.Alarm.alarm, value=value)
+
     def move(self, value: Literal['left', 'right']) -> None:
         self.__set(_command = CommonFanZA5.CustomService.move, value=value)
 
@@ -189,7 +200,7 @@ class FanZA5(ModelFanZA5):
             self.model.split('.')
         ))
 
-        self._switches = [FanPowerSwitch, FanSwingModeSwitch, FanAnionSwitch, FanPyhsicalControlLockedSwitch]
+        self._switches = [FanPowerSwitch, FanSwingModeSwitch, FanAnionSwitch, FanPyhsicalControlLockedSwitch, FanAlarmSwitch]
         self._buttons  = [FanMoveLeftButton, FanMoveRightButton]
         self._selects  = [FanSpeedLevelSelect] 
         self._numbers  = [FanSwingAngleNumber, FanSpeedPercentNumber, FanBrightnessNumber]
@@ -362,6 +373,34 @@ class FanPyhsicalControlLockedSwitch(SwitchEntity):
     @property
     def icon(self):
         return "mdi:lock" if self.is_on else "mdi:lock-open"
+
+class FanAlarmSwitch(SwitchEntity):
+
+    def __init__(self, fan_device: FanZA5):
+        self._device = fan_device
+        self._name = f"Fan Alarm {self._device.name}"
+
+    @property
+    def name(self):
+        return self._name
+
+    @property
+    def is_on(self):
+        return self._device.alarm
+
+    def turn_on(self):
+        self._device.alarm_on()
+
+    def turn_off(self):
+        self._device.alarm_off()
+
+    @property
+    def device_info(self):
+        return {"identifiers": {(DOMAIN, self._name.lower().replace(" ", "_"))}}
+
+    @property
+    def icon(self):
+        return "mdi:bell-outline" if self.is_on else "mdi:bell-off-outline"
 
 # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- #
 
