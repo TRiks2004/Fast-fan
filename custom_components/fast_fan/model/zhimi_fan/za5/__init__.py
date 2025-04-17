@@ -326,7 +326,8 @@ class FanSwingAngleNumber(NumberEntity):
     def icon(self):
         return "mdi:arrow-left-right-bold"
     
-    def set_value(self, value: float):
+    def set_native_value(self, value: float):
+        _LOGGER.error("Swing angle: %s", value)
         self._device.swing_mode_angle = int(value)
 
     @property
