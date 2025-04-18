@@ -670,3 +670,4 @@ class FanBatterySensor(SensorEntity):
     @property
     def device_info(self):
         return {"identifiers": {(DOMAIN, self._name.lower().replace(" ", "_"))}}
+

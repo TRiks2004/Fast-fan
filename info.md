@@ -1,1 +1,1 @@
-Fast Fan integration
+Fast Fan integration - test info
