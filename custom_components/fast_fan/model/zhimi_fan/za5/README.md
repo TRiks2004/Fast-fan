@@ -1,5 +1,5 @@
 
-[Smartmi DC Inverter Напольный вентилятор 3](https://home.miot-spec.com/spec/zhimi.fan.za5)
+[Xiaomi Smartmi Pedestal Fan 3](https://home.miot-spec.com/spec/zhimi.fan.za5)
 
 > ✅ - реализовано | ❌ - не реализовано |❓- не возможно реализовать 
 ### 🌀 **Fan (siid: 2)**
