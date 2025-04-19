@@ -15,19 +15,15 @@ class Fan:
         ip: str, token: str
     ) -> None:        
         self.hass:HomeAssistant = hass
-        
         self._ip = ip
         self._token = token
+        self.object = MiotDevice(ip=ip, token=token)
 
-        self.object = MiotDevice(
-            ip=ip, 
-            token=token
-        )
-
-    def pull_data(self):
+    def ppull_dataull_data(self):
         self.info = self.object.info().data
 
         match self.info['model']:
             case 'zhimi.fan.za5':
                 self.devices = FanZA5(object=self.object)
                 
+        
