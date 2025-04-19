@@ -484,6 +484,14 @@ class FanSpeedLevelSelect(SelectEntity):
     def select_option(self, option: str) -> None:
         self._device.level = int(option)
 
+    @property
+    def unique_id(self):
+        return f"{self._device.info.mac_address}_level"
+    
+    @property
+    def device_info(self):
+        return {"identifiers": {(DOMAIN, self._device.info.mac_address)}}
+
 # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- #
 
 class FanSwingAngleNumber(NumberEntity):
