@@ -25,10 +25,11 @@ class ModelFanZA5:
     lavels = [1, 2, 3, 4]
 
     min_angle = 30
-    max_angle = 120
+    max_angle = 120 
 
     def __init__(self, object: MiotDevice) -> None:
         self.object = object
+        self.info = self.object.info()
 
     def __get(
         self, *, _command: Command
@@ -267,7 +268,7 @@ class FanPowerSwitch(SwitchEntity):
 
     @property
     def device_info(self):
-        return {"identifiers": {(DOMAIN, self._name.lower().replace(" ", "_"))}}
+        return {"identifiers": {(DOMAIN, self._device.info.mac_address)}}
 
     @property
     def icon(self):
@@ -294,7 +295,7 @@ class FanSwingModeSwitch(SwitchEntity):
 
     @property
     def device_info(self):
-        return {"identifiers": {(DOMAIN, self._name.lower().replace(" ", "_"))}}
+        return {"identifiers": {(DOMAIN, self._device.info.mac_address)}}
 
     @property
     def icon(self):
@@ -322,7 +323,7 @@ class FanAnionSwitch(SwitchEntity):
 
     @property
     def device_info(self):
-        return {"identifiers": {(DOMAIN, self._name.lower().replace(" ", "_"))}}
+        return {"identifiers": {(DOMAIN, self._device.info.mac_address)}}
 
     @property
     def icon(self):
@@ -350,7 +351,7 @@ class FanPyhsicalControlLockedSwitch(SwitchEntity):
 
     @property
     def device_info(self):
-        return {"identifiers": {(DOMAIN, self._name.lower().replace(" ", "_"))}}
+        return {"identifiers": {(DOMAIN, self._device.info.mac_address)}}
 
     @property
     def icon(self):
@@ -378,7 +379,7 @@ class FanAlarmSwitch(SwitchEntity):
 
     @property
     def device_info(self):
-        return {"identifiers": {(DOMAIN, self._name.lower().replace(" ", "_"))}}
+        return {"identifiers": {(DOMAIN, self._device.info.mac_address)}}
 
     @property
     def icon(self):
@@ -401,7 +402,7 @@ class FanMoveLeftButton(ButtonEntity):
 
     @property
     def device_info(self):
-        return {"identifiers": {(DOMAIN, self._name.lower().replace(" ", "_"))}}
+        return {"identifiers": {(DOMAIN, self._device.info.mac_address)}}
 
     @property
     def icon(self):
@@ -425,7 +426,7 @@ class FanMoveRightButton(ButtonEntity):
 
     @property
     def device_info(self):
-        return {"identifiers": {(DOMAIN, self._name.lower().replace(" ", "_"))}}
+        return {"identifiers": {(DOMAIN, self._device.info.mac_address)}}
 
     @property
     def icon(self):
@@ -492,7 +493,7 @@ class FanSwingAngleNumber(NumberEntity):
 
     @property
     def device_info(self):
-        return {"identifiers": {(DOMAIN, self._name.lower().replace(" ", "_"))}}
+        return {"identifiers": {(DOMAIN, self._device.info.mac_address)}}
 
 class FanSpeedPercentNumber(NumberEntity):
     def __init__(self, fan_device: FanZA5):
@@ -528,7 +529,7 @@ class FanSpeedPercentNumber(NumberEntity):
 
     @property
     def device_info(self):
-        return {"identifiers": {(DOMAIN, self._name.lower().replace(" ", "_"))}}
+        return {"identifiers": {(DOMAIN, self._device.info.mac_address)}}
 
 class FanBrightnessNumber(NumberEntity):
     def __init__(self, fan_device: FanZA5):
@@ -571,7 +572,7 @@ class FanBrightnessNumber(NumberEntity):
             
     @property
     def device_info(self):
-        return {"identifiers": {(DOMAIN, self._name.lower().replace(" ", "_"))}}
+        return {"identifiers": {(DOMAIN, self._device.info.mac_address)}}
 
 # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- #
 
@@ -598,7 +599,7 @@ class FanSpeedRpmSensor(SensorEntity):
 
     @property
     def device_info(self):
-        return {"identifiers": {(DOMAIN, self._name.lower().replace(" ", "_"))}}
+        return {"identifiers": {(DOMAIN, self._device.info.mac_address)}}
 
 class FanTempSensor(SensorEntity):
     def __init__(self, fan_device: FanZA5):
@@ -623,7 +624,7 @@ class FanTempSensor(SensorEntity):
 
     @property
     def device_info(self):
-        return {"identifiers": {(DOMAIN, self._name.lower().replace(" ", "_"))}}
+        return {"identifiers": {(DOMAIN, self._device.info.mac_address)}}
     
 class FanHumiditySensor(SensorEntity):
     def __init__(self, fan_device: FanZA5):
@@ -648,7 +649,7 @@ class FanHumiditySensor(SensorEntity):
 
     @property
     def device_info(self):
-        return {"identifiers": {(DOMAIN, self._name.lower().replace(" ", "_"))}}
+        return {"identifiers": {(DOMAIN, self._device.info.mac_address)}}
     
 class FanBatterySensor(SensorEntity):
     def __init__(self, fan_device: FanZA5):
@@ -673,7 +674,7 @@ class FanBatterySensor(SensorEntity):
 
     @property
     def device_info(self):
-        return {"identifiers": {(DOMAIN, self._name.lower().replace(" ", "_"))}}
+        return {"identifiers": {(DOMAIN, self._device.info.mac_address)}}
 
 class FanAcStateSensor(SensorEntity):
     def __init__(self, fan_device: FanZA5):
@@ -698,5 +699,5 @@ class FanAcStateSensor(SensorEntity):
 
     @property
     def device_info(self):
-        return {"identifiers": {(DOMAIN, self._name.lower().replace(" ", "_"))}}
+        return {"identifiers": {(DOMAIN, self._device.info.mac_address)}}
 

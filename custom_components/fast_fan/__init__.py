@@ -34,7 +34,6 @@ async def async_setup_entry(
     info = _object.object.info()
     dev_reg.async_get_or_create(
         config_entry_id=entry.entry_id,
-
         identifiers={(DOMAIN, info.mac_address)},
         manufacturer="Xiaomi",
         name="Fast Fan",
