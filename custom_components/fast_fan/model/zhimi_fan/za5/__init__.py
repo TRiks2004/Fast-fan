@@ -686,7 +686,7 @@ class FanAcStateSensor(SensorEntity):
 
     @property
     def native_value(self) -> bool:
-        return self._device.ac_power
+        return self._device.ac_state
 
     @property
     def icon(self):
