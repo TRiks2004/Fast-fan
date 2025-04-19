@@ -267,6 +267,10 @@ class FanPowerSwitch(SwitchEntity):
         self._device.power_off()
 
     @property
+    def unique_id(self):
+        return f"{self._device.info.mac_address}_power"
+
+    @property
     def device_info(self):
         return {"identifiers": {(DOMAIN, self._device.info.mac_address)}}
 
@@ -295,12 +299,10 @@ class FanSwingModeSwitch(SwitchEntity):
 
     @property
     def unique_id(self):
-        _LOGGER.error(f"swing_mode: {self._device.swing_mode} | unique_id: {self._device.info.mac_address}_swing_mode")
         return f"{self._device.info.mac_address}_swing_mode"
 
     @property
     def device_info(self):
-        _LOGGER.error(f"swing_mode: {self._device.swing_mode} | DOMAIN: {DOMAIN} | mac_address: {self._device.info.mac_address}")
         return {"identifiers": {(DOMAIN, self._device.info.mac_address)}}
 
     @property
@@ -326,6 +328,10 @@ class FanAnionSwitch(SwitchEntity):
 
     def turn_off(self):
         self._device.anion_off()
+
+    @property
+    def unique_id(self):
+        return f"{self._device.info.mac_address}_anion"
 
     @property
     def device_info(self):
@@ -356,6 +362,10 @@ class FanPyhsicalControlLockedSwitch(SwitchEntity):
         self._device.physical_controls_locked_off()
 
     @property
+    def unique_id(self):
+        return f"{self._device.info.mac_address}_physical_controls_locked"
+
+    @property
     def device_info(self):
         return {"identifiers": {(DOMAIN, self._device.info.mac_address)}}
 
@@ -384,6 +394,10 @@ class FanAlarmSwitch(SwitchEntity):
         self._device.alarm_off()
 
     @property
+    def unique_id(self):
+        return f"{self._device.info.mac_address}_alarm"
+
+    @property
     def device_info(self):
         return {"identifiers": {(DOMAIN, self._device.info.mac_address)}}
 
@@ -405,6 +419,10 @@ class FanMoveLeftButton(ButtonEntity):
 
     def press(self):
         self._device.move_left()
+
+    @property
+    def unique_id(self):
+        return f"{self._device.info.mac_address}_move_left"
 
     @property
     def device_info(self):
@@ -429,6 +447,10 @@ class FanMoveRightButton(ButtonEntity):
 
     def release(self):
         pass
+    
+    @property
+    def unique_id(self):
+        return f"{self._device.info.mac_address}_move_right"
 
     @property
     def device_info(self):
@@ -498,6 +520,10 @@ class FanSwingAngleNumber(NumberEntity):
         self._device.swing_angle = int(value)
 
     @property
+    def unique_id(self):
+        return f"{self._device.info.mac_address}_swing_angle"
+
+    @property
     def device_info(self):
         return {"identifiers": {(DOMAIN, self._device.info.mac_address)}}
 
@@ -532,6 +558,10 @@ class FanSpeedPercentNumber(NumberEntity):
     @property
     def icon(self):
         return "mdi:speedometer-medium"
+
+    @property
+    def unique_id(self):
+        return f"{self._device.info.mac_address}_speed_procent"
 
     @property
     def device_info(self):
@@ -575,7 +605,11 @@ class FanBrightnessNumber(NumberEntity):
             case _:
                 _value = min(90, max(10, round(value / 10) * 10))
                 return f"mdi:lightbulb-on-{_value}"
-            
+
+    @property
+    def unique_id(self):
+        return f"{self._device.info.mac_address}_brightness"
+
     @property
     def device_info(self):
         return {"identifiers": {(DOMAIN, self._device.info.mac_address)}}
@@ -604,6 +638,10 @@ class FanSpeedRpmSensor(SensorEntity):
         return "mdi:fan"
 
     @property
+    def unique_id(self):
+        return f"{self._device.info.mac_address}_speed_rpm"
+
+    @property
     def device_info(self):
         return {"identifiers": {(DOMAIN, self._device.info.mac_address)}}
 
@@ -627,6 +665,10 @@ class FanTempSensor(SensorEntity):
     @property
     def icon(self):
         return "mdi:thermometer"
+
+    @property
+    def unique_id(self):
+        return f"{self._device.info.mac_address}_temperature"
 
     @property
     def device_info(self):
@@ -654,6 +696,10 @@ class FanHumiditySensor(SensorEntity):
         return "mdi:water-percent"
 
     @property
+    def unique_id(self):
+        return f"{self._device.info.mac_address}_humidity"
+
+    @property
     def device_info(self):
         return {"identifiers": {(DOMAIN, self._device.info.mac_address)}}
     
@@ -679,6 +725,10 @@ class FanBatterySensor(SensorEntity):
         return "battery"
 
     @property
+    def unique_id(self):
+        return f"{self._device.info.mac_address}_battery"
+
+    @property
     def device_info(self):
         return {"identifiers": {(DOMAIN, self._device.info.mac_address)}}
 
@@ -702,6 +752,10 @@ class FanAcStateSensor(SensorEntity):
     @property
     def device_class(self):
         return "power"
+
+    @property
+    def unique_id(self):
+        return f"{self._device.info.mac_address}_ac_state"
 
     @property
     def device_info(self):
