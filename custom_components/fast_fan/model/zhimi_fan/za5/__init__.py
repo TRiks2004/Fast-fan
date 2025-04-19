@@ -294,7 +294,13 @@ class FanSwingModeSwitch(SwitchEntity):
         self._device.swing_mode_off()
 
     @property
+    def unique_id(self):
+        _LOGGER.error(f"swing_mode: {self._device.swing_mode} | unique_id: {self._device.info.mac_address}_swing_mode")
+        return f"{self._device.info.mac_address}_swing_mode"
+
+    @property
     def device_info(self):
+        _LOGGER.error(f"swing_mode: {self._device.swing_mode} | DOMAIN: {DOMAIN} | mac_address: {self._device.info.mac_address}")
         return {"identifiers": {(DOMAIN, self._device.info.mac_address)}}
 
     @property
