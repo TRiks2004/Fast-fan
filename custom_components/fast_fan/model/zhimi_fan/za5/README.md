@@ -1,4 +1,3 @@
-
 [Xiaomi Smartmi Pedestal Fan 3](https://home.miot-spec.com/spec/zhimi.fan.za5)
 
 > ✅ - реализовано | ❌ - не реализовано |❓- не возможно реализовать 

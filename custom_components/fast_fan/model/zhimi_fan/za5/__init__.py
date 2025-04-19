@@ -157,6 +157,10 @@ class ModelFanZA5:
     def battery_state(self) -> bool:
         return self.__get(_command = CommonFanZA5.CustomService.battery_state)
 
+    @property
+    def ac_state(self) -> bool:
+        return self.__get(_command = CommonFanZA5.CustomService.ac_state)
+
     def move(self, value: Literal['left', 'right']) -> None:
         self.__set(_command = CommonFanZA5.CustomService.move, value=value)
 
@@ -176,7 +180,7 @@ class FanZA5(ModelFanZA5):
         self._buttons  = [FanMoveLeftButton, FanMoveRightButton]
         self._selects  = [FanSpeedLevelSelect] 
         self._numbers  = [FanSwingAngleNumber, FanSpeedPercentNumber, FanBrightnessNumber]
-        self._sensors  = [FanSpeedRpmSensor, FanTempSensor, FanHumiditySensor, FanBatterySensor]
+        self._sensors  = [FanSpeedRpmSensor, FanTempSensor, FanHumiditySensor, FanBatterySensor, FanAcStateSensor]
 
     def __entity(self, entity: list[any]):
         return list(map(
@@ -666,6 +670,31 @@ class FanBatterySensor(SensorEntity):
     @property
     def device_class(self):
         return "battery"
+
+    @property
+    def device_info(self):
+        return {"identifiers": {(DOMAIN, self._name.lower().replace(" ", "_"))}}
+
+class FanAcStateSensor(SensorEntity):
+    def __init__(self, fan_device: FanZA5):
+        self._device = fan_device
+        self._name = f"AC Power {self._device.name}"
+
+    @property
+    def name(self):
+        return self._name
+
+    @property
+    def native_value(self) -> bool:
+        return self._device.ac_power
+
+    @property
+    def icon(self):
+        return "mdi:power-plug-outline" if self.native_value else "mdi:power-plug-off-outline"
+
+    @property
+    def device_class(self):
+        return "power"
 
     @property
     def device_info(self):
