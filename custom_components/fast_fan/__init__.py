@@ -35,7 +35,7 @@ async def async_setup_entry(
     dev_reg.async_get_or_create(
         config_entry_id=entry.entry_id,
 
-        identifiers={(DOMAIN, info.mac_address)},  # или IP, если MAC нет
+        identifiers={(DOMAIN, info.mac_address)},
         manufacturer="Xiaomi",
         name="Fast Fan",
         model=info.model,
