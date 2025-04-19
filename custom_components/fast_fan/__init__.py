@@ -40,7 +40,6 @@ async def async_setup_entry(
         name="Fast Fan",
         model=info.model,
         sw_version=info.firmware_version,
-        entry_type=DeviceEntryType.HUB,
     )
 
     return True
