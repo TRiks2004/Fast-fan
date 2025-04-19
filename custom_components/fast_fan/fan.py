@@ -19,11 +19,10 @@ class Fan:
         self._token = token
         self.object = MiotDevice(ip=ip, token=token)
 
-    def ppull_dataull_data(self):
+    def pull_data(self):
         self.info = self.object.info().data
 
         match self.info['model']:
             case 'zhimi.fan.za5':
                 self.devices = FanZA5(object=self.object)
                 
-        
