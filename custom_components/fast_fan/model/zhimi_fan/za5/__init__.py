@@ -699,5 +699,6 @@ class FanAcStateSensor(SensorEntity):
 
     @property
     def device_info(self):
+        _LOGGER.error(f"ac_state: {self._device.ac_state} | DOMAIN: {DOMAIN} | mac_address: {self._device.info.mac_address}")
         return {"identifiers": {(DOMAIN, self._device.info.mac_address)}}
 

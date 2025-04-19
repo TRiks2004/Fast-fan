@@ -32,6 +32,7 @@ async def async_setup_entry(
     
     dev_reg = get_dev_reg(hass)
     info = _object.object.info()
+    _LOGGER.error(f"entry: {entry.entry_id} | DOMAIN: {DOMAIN} | mac_address: {info.mac_address}")
     dev_reg.async_get_or_create(
         config_entry_id=entry.entry_id,
         identifiers={(DOMAIN, info.mac_address)},
