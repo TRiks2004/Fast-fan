@@ -361,6 +361,9 @@ class Fan(FanEntity):
         return self._device.environment.speed_procent
 
     def set_percentage(self, percentage: int) -> None:
+        if percentage == 0:
+            self.turn_off()
+
         self._device.environment.speed_procent = percentage
         self._device.speed_procent = percentage
 
