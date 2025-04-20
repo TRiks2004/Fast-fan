@@ -352,7 +352,7 @@ class FanPowerSwitch(SwitchEntity):
         return "mdi:fan" if self.is_on else "mdi:fan-off"
     
     def update(self):
-        self._device.pull_data()
+        self._device.environment.is_power = self._device.power
 
 class FanSwingModeSwitch(SwitchEntity):
     def __init__(self, fan_device: FanZA5):
@@ -386,7 +386,7 @@ class FanSwingModeSwitch(SwitchEntity):
         return "mdi:sync" if self.is_on else "mdi:circle-outline"
     
     def update(self):
-        self._device.pull_data()
+        self._device.environment.is_swing_mode = self._device.swing_mode
 
 class FanAnionSwitch(SwitchEntity):
     
@@ -421,7 +421,7 @@ class FanAnionSwitch(SwitchEntity):
         return "mdi:blur" if self.is_on else "mdi:blur-off"
     
     def update(self):
-        self._device.pull_data()
+        self._device.environment.is_anion = self._device.anion
 
 class FanPyhsicalControlLockedSwitch(SwitchEntity):
 
@@ -456,7 +456,7 @@ class FanPyhsicalControlLockedSwitch(SwitchEntity):
         return "mdi:lock-outline" if self.is_on else "mdi:lock-open-variant-outline"
     
     def update(self):
-        self._device.pull_data()
+        self._device.environment.is_physical_controls_locked = self._device.physical_controls_locked
 
 class FanAlarmSwitch(SwitchEntity):
 
@@ -491,7 +491,7 @@ class FanAlarmSwitch(SwitchEntity):
         return "mdi:bell-outline" if self.is_on else "mdi:bell-off-outline"
     
     def update(self):
-        self._device.pull_data()
+        self._device.environment.is_alarm = self._device.alarm
 
 # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- #
 
@@ -580,9 +580,10 @@ class FanSpeedLevelSelect(SelectEntity):
     def device_info(self):
         return {"identifiers": {(DOMAIN, self._device.info.mac_address)}}
     
-    @property
     def update(self):
-        self._device.pull_data()
+        self._device.environment.speed_rpm = self._device.speed_rpm
+        self._device.environment.speed_procent = self._device.speed_procent
+        self._device.environment.level = self._device.level
 
 # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- #
 
@@ -628,7 +629,7 @@ class FanSwingAngleNumber(NumberEntity):
         return {"identifiers": {(DOMAIN, self._device.info.mac_address)}}
     
     def update(self):
-        self._device.pull_data()
+        self._device.environment.swing_angle = self._device.swing_angle
 
 class FanSpeedPercentNumber(NumberEntity):
     def __init__(self, fan_device: FanZA5):
@@ -672,7 +673,9 @@ class FanSpeedPercentNumber(NumberEntity):
         return {"identifiers": {(DOMAIN, self._device.info.mac_address)}}
     
     def update(self):
-        self._device.pull_data()
+        self._device.environment.speed_rpm = self._device.speed_rpm
+        self._device.environment.speed_procent = self._device.speed_procent
+        self._device.environment.level = self._device.level
 
 class FanBrightnessNumber(NumberEntity):
     def __init__(self, fan_device: FanZA5):
@@ -723,7 +726,7 @@ class FanBrightnessNumber(NumberEntity):
         return {"identifiers": {(DOMAIN, self._device.info.mac_address)}}
     
     def update(self):
-        self._device.pull_data()
+        self._device.environment.brightness = self._device.brightness
 
 # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- #
 
@@ -757,7 +760,7 @@ class FanSpeedRpmSensor(SensorEntity):
         return {"identifiers": {(DOMAIN, self._device.info.mac_address)}}
     
     def update(self):
-        self._device.pull_data()
+        self._device.environment.speed_rpm = self._device.speed_rpm
 
 class FanTempSensor(SensorEntity):
     def __init__(self, fan_device: FanZA5):
@@ -789,7 +792,7 @@ class FanTempSensor(SensorEntity):
         return {"identifiers": {(DOMAIN, self._device.info.mac_address)}}
     
     def update(self):
-        self._device.pull_data()
+        self._device.environment.temperature = self._device.temperature
     
 class FanHumiditySensor(SensorEntity):
     def __init__(self, fan_device: FanZA5):
@@ -821,7 +824,7 @@ class FanHumiditySensor(SensorEntity):
         return {"identifiers": {(DOMAIN, self._device.info.mac_address)}}
     
     def update(self):
-        self._device.pull_data()
+        self._device.environment.humidity = self._device.humidity
     
 class FanBatterySensor(SensorEntity):
     def __init__(self, fan_device: FanZA5):
