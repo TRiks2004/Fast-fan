@@ -205,7 +205,7 @@ class FanZA5(ModelFanZA5):
         self._selects  = [FanSpeedLevelSelect] 
         self._numbers  = [FanSwingAngleNumber, FanSpeedPercentNumber, FanBrightnessNumber]
         self._sensors  = [FanSpeedRpmSensor, FanTempSensor, FanHumiditySensor, FanBatterySensor, FanAcStateSensor]
-        self._fans = []
+        self._fans = [Fan]
 
         self._entitys = [
             self._switches, self._buttons, 
@@ -321,7 +321,7 @@ class FanZA5(ModelFanZA5):
 
 # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- #
 
-class XiaomiFanZA5(FanEntity):
+class Fan(FanEntity):
     def __init__(self, device: FanZA5):
         self._device = device
         self._attr_name = "Xiaomi Smart Fan ZA5"
