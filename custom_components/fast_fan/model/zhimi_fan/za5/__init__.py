@@ -325,6 +325,7 @@ class Fan(FanEntity):
     def __init__(self, device: FanZA5):
         self._device = device
         self._attr_name = "Xiaomi Smart Fan ZA5"
+        self._attr_unique_id = f"{self._device.info.mac_address}_fan"
         self._attr_supported_features = (
             FanEntityFeature.SET_SPEED |
             FanEntityFeature.OSCILLATE |
@@ -368,20 +369,6 @@ class Fan(FanEntity):
     def oscillate(self, oscillating: bool) -> None:
         self._device.environment.is_swing_mode = oscillating
         self._device.swing_mode = oscillating
-
-    @property
-    def unique_id(self) -> str:
-        return f"{self._device.info.mac_address}_fan"
-
-    @property
-    def device_info(self) -> dict:
-        return {
-            "identifiers": {(DOMAIN, self._device.info.mac_address)},
-            "name": "Xiaomi Smart Fan ZA5",
-            "manufacturer": "Xiaomi",
-            "model": self._device.info.model,
-            "sw_version": self._device.info.firmware_version,
-        }
 
     @property
     def extra_state_attributes(self) -> dict:
