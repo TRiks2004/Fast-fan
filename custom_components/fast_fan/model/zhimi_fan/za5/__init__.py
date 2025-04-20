@@ -213,6 +213,8 @@ class FanZA5(ModelFanZA5):
             self._sensors, self._fans
         ]
 
+
+
         self.pull_data()
 
     def pull_data(self) -> None:
@@ -239,6 +241,8 @@ class FanZA5(ModelFanZA5):
         environment.is_battery_state = self.battery_state
 
         self.environment = environment
+
+        self.info = self.object.info()
     
     def __entity(self, entity: list[any]):
         return list(map(
@@ -317,6 +321,86 @@ class FanZA5(ModelFanZA5):
 
 # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- #
 
+class XiaomiFanZA5(FanEntity):
+    def __init__(self, device: FanZA5):
+        self._device = device
+        self._attr_name = "Xiaomi Smart Fan ZA5"
+        self._attr_supported_features = (
+            FanEntityFeature.SET_SPEED |
+            FanEntityFeature.OSCILLATE |
+            FanEntityFeature.PRESET_MODE
+        )
+        self._attr_percentage_step = 1
+        self._attr_preset_modes = ["1", "2", "3", "4"]
+
+    @property
+    def is_on(self) -> bool:
+        return self._device.power
+
+    def turn_on(self, **kwargs) -> None:
+        self._device.environment.is_power = True
+        self._device.power_on() 
+
+    def turn_off(self, **kwargs) -> None:
+        self._device.environment.is_power = False
+        self._device.power_off
+
+    @property
+    def percentage(self) -> int:
+        return self._device.environment.speed_procent
+
+    def set_percentage(self, percentage: int) -> None:
+        self._device.environment.speed_procent = percentage
+        self._device.speed_procent = percentage
+
+    @property
+    def preset_mode(self) -> str:
+        return str(self._device.environment.level)
+
+    def set_preset_mode(self, preset_mode: str) -> None:
+        self._device.environment.level = int(preset_mode)
+        self._device.level = int(preset_mode)
+
+    @property
+    def oscillating(self) -> bool:
+        return self._device.environment.is_swing_mode
+
+    def oscillate(self, oscillating: bool) -> None:
+        self._device.environment.is_swing_mode = oscillating
+        self._device.swing_mode = oscillating
+
+    @property
+    def unique_id(self) -> str:
+        return f"{self._device.info.mac_address}_fan"
+
+    @property
+    def device_info(self) -> dict:
+        return {
+            "identifiers": {(DOMAIN, self._device.info.mac_address)},
+            "name": "Xiaomi Smart Fan ZA5",
+            "manufacturer": "Xiaomi",
+            "model": self._device.info.model,
+            "sw_version": self._device.info.firmware_version,
+        }
+
+    @property
+    def extra_state_attributes(self) -> dict:
+        return {
+            "swing_angle": self._device.environment.swing_angle,
+            "anion": self._device.environment.is_anion,
+            "temperature": self._device.environment.temperature,
+            "humidity": self._device.environment.humidity,
+            "indicator_light_brightness": self._device.environment.brightness,
+            "alarm_active": self._device.environment.is_alarm,
+            "battery": self._device.environment.is_battery_state,
+            "ac_power": self._device.environment.is_ac_state,
+            "rpm": self._device.environment.speed_rpm,
+            "physical_controls_locked": self._device.environment.is_physical_controls_locked,
+            "info": self._device.info.data()
+        }
+    
+    def update(self):
+        self._device.pull_data()
 
 # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- #
 
