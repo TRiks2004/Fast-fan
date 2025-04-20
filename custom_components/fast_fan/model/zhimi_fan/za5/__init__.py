@@ -388,7 +388,10 @@ class Fan(FanEntity):
         }
     
     def update(self):
-        self._device.pull_data()
+        self._device.environment.is_power = self._device.power
+        self._device.environment.is_swing_mode = self._device.swing_mode
+        self._device.environment.level = self._device.level
+        self._device.environment.speed_procent = self._device.speed_procent
 
 # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- #
 
