@@ -15,10 +15,30 @@ from custom_components.fast_fan.const import DOMAIN
 from custom_components.fast_fan.command import Command
 from .common_fan_za5 import CommonFanZA5
 
-
 _LOGGER = logging.getLogger(__name__)
 
 # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- #
+
+class EnvironmentFanZA5:
+    is_power: bool
+    is_anion: bool
+    is_swing_mode: bool
+    is_physical_controls_locked: bool
+    is_alarm: bool
+    is_battery_state: bool
+    is_ac_state: bool
+
+    swing_angle: int
+
+    speed_rpm: int
+    speed_procent: int
+    level: int
+
+    brightness: int
+
+    temperature: float
+    humidity: int
+
 
 class ModelFanZA5:
     model='zhimi.fan.za5'
@@ -27,6 +47,8 @@ class ModelFanZA5:
 
     min_angle = 30
     max_angle = 120 
+
+    environment = EnvironmentFanZA5()
 
     def __init__(self, object: MiotDevice) -> None:
         self.object = object
@@ -114,7 +136,7 @@ class ModelFanZA5:
         self.__set(_command = CommonFanZA5.Fan.anion, value=value)
 
     @property
-    def temperature(self) -> int:
+    def temperature(self) -> float:
         return self.__get(_command = CommonFanZA5.Environment.temperature)
     
     @property
@@ -183,13 +205,40 @@ class FanZA5(ModelFanZA5):
         self._selects  = [FanSpeedLevelSelect] 
         self._numbers  = [FanSwingAngleNumber, FanSpeedPercentNumber, FanBrightnessNumber]
         self._sensors  = [FanSpeedRpmSensor, FanTempSensor, FanHumiditySensor, FanBatterySensor, FanAcStateSensor]
-        self._fans = [Fan]
+        self._fans = []
 
         self._entitys = [
             self._switches, self._buttons, 
             self._selects, self._numbers, 
             self._sensors, self._fans
         ]
+
+        self.pull_data()
+
+    def pull_data(self) -> None:
+        environment = self.environment
+        
+        environment.swing_angle = self.swing_angle
+        environment.speed_rpm = self.speed_rpm
+        environment.speed_procent = self.speed_procent
+        environment.level = self.level
+
+        environment.temperature = self.temperature
+        environment.humidity = self.humidity
+
+        environment.brightness = self.brightness
+        
+        environment.is_power = self.power
+        environment.is_anion = self.anion
+        environment.is_swing_mode = self.swing_mode
+
+        environment.is_alarm = self.alarm
+        environment.is_physical_controls_locked = self.physical_controls_locked
+        
+        environment.is_ac_state = self.ac_state
+        environment.is_battery_state = self.battery_state
+
+        self.environment = environment
     
     def __entity(self, entity: list[any]):
         return list(map(
@@ -268,56 +317,6 @@ class FanZA5(ModelFanZA5):
 
 # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- #
 
-class Fan(FanEntity):
-    def __init__(self, device: FanZA5):
-        self._device = device
-        self._attr_name = "Xiaomi Smart Fan ZA5"
-        self._attr_unique_id = device.info.mac_address + "_fan"
-        self._attr_supported_features = (
-            FanEntityFeature.SET_SPEED |
-            FanEntityFeature.OSCILLATE
-        )
-        self._attr_percentage_step = 1  # 4 уровня: 25, 50, 75, 100
-
-    @property
-    def is_on(self) -> bool:
-        return self._device.power
-
-    def turn_on(self, **kwargs) -> None:
-        self._device.power_on
-
-    def turn_off(self, **kwargs) -> None:
-        self._device.power_off
-
-    @property
-    def percentage(self) -> int:
-        return self._device.speed_procent
-
-    def set_percentage(self, percentage: int) -> None:
-        self._device.speed_procent = percentage
-
-    @property
-    def oscillating(self) -> bool:
-        return self._device.swing_mode
-
-    def oscillate(self, oscillating: bool) -> None:
-        self._device.swing_mode = oscillating
-
-    @property
-    def extra_state_attributes(self) -> dict:
-        return {
-            "swing_angle": self._device.swing_angle,
-            "anion": self._device.anion,
-            "temperature": self._device.temperature,
-            "humidity": self._device.humidity,
-            "indicator_light_brightness": self._device.brightness,
-            "alarm_active": self._device.alarm,
-            "battery": self._device.battery_state,
-            "ac_power": self._device.ac_state,
-            "rpm": self._device.speed_rpm,
-            "physical_controls_locked": self._device.physical_controls_locked,
-        }
-
 
 # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- #
 
@@ -332,7 +331,7 @@ class FanPowerSwitch(SwitchEntity):
 
     @property
     def is_on(self):
-        return self._device.power
+        return self._device.environment.is_power
 
     def turn_on(self):
         self._device.power_on()
@@ -351,6 +350,9 @@ class FanPowerSwitch(SwitchEntity):
     @property
     def icon(self):
         return "mdi:fan" if self.is_on else "mdi:fan-off"
+    
+    def update(self):
+        self._device.pull_data()
 
 class FanSwingModeSwitch(SwitchEntity):
     def __init__(self, fan_device: FanZA5):
@@ -363,7 +365,7 @@ class FanSwingModeSwitch(SwitchEntity):
 
     @property
     def is_on(self):
-        return self._device.swing_mode
+        return self._device.environment.is_swing_mode
 
     def turn_on(self):
         self._device.swing_mode_on()
@@ -382,6 +384,9 @@ class FanSwingModeSwitch(SwitchEntity):
     @property
     def icon(self):
         return "mdi:sync" if self.is_on else "mdi:circle-outline"
+    
+    def update(self):
+        self._device.pull_data()
 
 class FanAnionSwitch(SwitchEntity):
     
@@ -395,7 +400,7 @@ class FanAnionSwitch(SwitchEntity):
 
     @property
     def is_on(self):
-        return self._device.anion
+        return self._device.environment.is_anion
 
     def turn_on(self):
         self._device.anion_on()
@@ -414,6 +419,9 @@ class FanAnionSwitch(SwitchEntity):
     @property
     def icon(self):
         return "mdi:blur" if self.is_on else "mdi:blur-off"
+    
+    def update(self):
+        self._device.pull_data()
 
 class FanPyhsicalControlLockedSwitch(SwitchEntity):
 
@@ -427,7 +435,7 @@ class FanPyhsicalControlLockedSwitch(SwitchEntity):
 
     @property
     def is_on(self):
-        return self._device.physical_controls_locked
+        return self._device.environment.is_physical_controls_locked
 
     def turn_on(self):
         self._device.physical_controls_locked_on()
@@ -446,6 +454,9 @@ class FanPyhsicalControlLockedSwitch(SwitchEntity):
     @property
     def icon(self):
         return "mdi:lock-outline" if self.is_on else "mdi:lock-open-variant-outline"
+    
+    def update(self):
+        self._device.pull_data()
 
 class FanAlarmSwitch(SwitchEntity):
 
@@ -459,7 +470,7 @@ class FanAlarmSwitch(SwitchEntity):
 
     @property
     def is_on(self):
-        return self._device.alarm
+        return self._device.environment.is_alarm
 
     def turn_on(self):
         self._device.alarm_on()
@@ -478,6 +489,9 @@ class FanAlarmSwitch(SwitchEntity):
     @property
     def icon(self):
         return "mdi:bell-outline" if self.is_on else "mdi:bell-off-outline"
+    
+    def update(self):
+        self._device.pull_data()
 
 # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- #
 
@@ -553,7 +567,7 @@ class FanSpeedLevelSelect(SelectEntity):
     
     @property
     def current_option(self) -> str:
-        return str(self._device.level)
+        return str(self._device.environment.level)
     
     def select_option(self, option: str) -> None:
         self._device.level = int(option)
@@ -565,6 +579,10 @@ class FanSpeedLevelSelect(SelectEntity):
     @property
     def device_info(self):
         return {"identifiers": {(DOMAIN, self._device.info.mac_address)}}
+    
+    @property
+    def update(self):
+        self._device.pull_data()
 
 # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- #
 
@@ -579,7 +597,7 @@ class FanSwingAngleNumber(NumberEntity):
     
     @property
     def native_value(self):
-        return self._device.swing_angle
+        return self._device.environment.swing_angle
     
     @property
     def native_min_value(self):
@@ -608,6 +626,9 @@ class FanSwingAngleNumber(NumberEntity):
     @property
     def device_info(self):
         return {"identifiers": {(DOMAIN, self._device.info.mac_address)}}
+    
+    def update(self):
+        self._device.pull_data()
 
 class FanSpeedPercentNumber(NumberEntity):
     def __init__(self, fan_device: FanZA5):
@@ -620,9 +641,10 @@ class FanSpeedPercentNumber(NumberEntity):
 
     @property
     def native_value(self):
-        return self._device.speed_procent
+        return self._device.environment.speed_procent
 
     def set_native_value(self, value: float):
+        self._device.environment.speed_procent = int(value)
         self._device.speed_procent = int(value)
 
     @property
@@ -648,6 +670,9 @@ class FanSpeedPercentNumber(NumberEntity):
     @property
     def device_info(self):
         return {"identifiers": {(DOMAIN, self._device.info.mac_address)}}
+    
+    def update(self):
+        self._device.pull_data()
 
 class FanBrightnessNumber(NumberEntity):
     def __init__(self, fan_device: FanZA5):
@@ -660,9 +685,10 @@ class FanBrightnessNumber(NumberEntity):
 
     @property
     def native_value(self):
-        return self._device.brightness
+        return self._device.environment.brightness
 
     def set_native_value(self, value: float):
+        self._device.environment.brightness = int(value)
         self._device.brightness = int(value)
 
     @property
@@ -695,6 +721,9 @@ class FanBrightnessNumber(NumberEntity):
     @property
     def device_info(self):
         return {"identifiers": {(DOMAIN, self._device.info.mac_address)}}
+    
+    def update(self):
+        self._device.pull_data()
 
 # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- #
 
@@ -709,7 +738,7 @@ class FanSpeedRpmSensor(SensorEntity):
 
     @property
     def native_value(self):
-        return self._device.speed_rpm
+        return self._device.environment.speed_rpm
 
     @property
     def native_unit_of_measurement(self):
@@ -726,6 +755,9 @@ class FanSpeedRpmSensor(SensorEntity):
     @property
     def device_info(self):
         return {"identifiers": {(DOMAIN, self._device.info.mac_address)}}
+    
+    def update(self):
+        self._device.pull_data()
 
 class FanTempSensor(SensorEntity):
     def __init__(self, fan_device: FanZA5):
@@ -738,7 +770,7 @@ class FanTempSensor(SensorEntity):
 
     @property
     def native_value(self):
-        return self._device.temperature
+        return self._device.environment.temperature
 
     @property
     def native_unit_of_measurement(self):
@@ -756,6 +788,9 @@ class FanTempSensor(SensorEntity):
     def device_info(self):
         return {"identifiers": {(DOMAIN, self._device.info.mac_address)}}
     
+    def update(self):
+        self._device.pull_data()
+    
 class FanHumiditySensor(SensorEntity):
     def __init__(self, fan_device: FanZA5):
         self._device = fan_device
@@ -767,7 +802,7 @@ class FanHumiditySensor(SensorEntity):
 
     @property
     def native_value(self):
-        return self._device.humidity
+        return self._device.environment.humidity
 
     @property
     def native_unit_of_measurement(self):
@@ -785,6 +820,9 @@ class FanHumiditySensor(SensorEntity):
     def device_info(self):
         return {"identifiers": {(DOMAIN, self._device.info.mac_address)}}
     
+    def update(self):
+        self._device.pull_data()
+    
 class FanBatterySensor(SensorEntity):
     def __init__(self, fan_device: FanZA5):
         self._device = fan_device
@@ -796,7 +834,7 @@ class FanBatterySensor(SensorEntity):
 
     @property
     def native_value(self) -> bool:
-        return self._device.battery_state
+        return self._device.environment.battery
 
     @property
     def icon(self):
@@ -813,6 +851,9 @@ class FanBatterySensor(SensorEntity):
     @property
     def device_info(self):
         return {"identifiers": {(DOMAIN, self._device.info.mac_address)}}
+    
+    def update(self):
+        self._device.pull_data()
 
 class FanAcStateSensor(SensorEntity):
     def __init__(self, fan_device: FanZA5):
@@ -825,7 +866,7 @@ class FanAcStateSensor(SensorEntity):
 
     @property
     def native_value(self) -> bool:
-        return self._device.ac_state
+        return self._device.environment.is_ac_state
 
     @property
     def icon(self):
@@ -843,4 +884,7 @@ class FanAcStateSensor(SensorEntity):
     def device_info(self):
         _LOGGER.error(f"ac_state: {self._device.ac_state} | DOMAIN: {DOMAIN} | mac_address: {self._device.info.mac_address}")
         return {"identifiers": {(DOMAIN, self._device.info.mac_address)}}
+    
+    def update(self):
+        self._device.pull_data()
 
