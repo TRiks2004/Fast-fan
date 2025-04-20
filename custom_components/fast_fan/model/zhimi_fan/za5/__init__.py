@@ -9,6 +9,7 @@ from homeassistant.components.button import ButtonEntity
 from homeassistant.components.select import SelectEntity
 from homeassistant.components.number import NumberEntity
 from homeassistant.components.sensor import SensorEntity
+from homeassistant.components.fan import FanEntity, FanEntityFeature
 
 from custom_components.fast_fan.const import DOMAIN 
 from custom_components.fast_fan.command import Command
@@ -244,6 +245,59 @@ class FanZA5(ModelFanZA5):
     
     def move_right(self) -> None:
         self.move('right')
+
+# -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- #
+
+class XiaomiFanZA5(FanEntity):
+    def __init__(self, device: FanZA5):
+        self._device = device
+        self._attr_name = "Xiaomi Smart Fan ZA5"
+        self._attr_unique_id = device.info.mac_address + "_fan"
+        self._attr_supported_features = (
+            FanEntityFeature.SET_SPEED |
+            FanEntityFeature.OSCILLATE
+        )
+        self._attr_percentage_step = 1  # 4 уровня: 25, 50, 75, 100
+
+    @property
+    def is_on(self) -> bool:
+        return self._device.power
+
+    def turn_on(self, **kwargs) -> None:
+        self._device.power_on
+
+    def turn_off(self, **kwargs) -> None:
+        self._device.power_off
+
+    @property
+    def percentage(self) -> int:
+        return self._device.speed_procent
+
+    def set_percentage(self, percentage: int) -> None:
+        self._device.speed_procent = percentage
+
+    @property
+    def oscillating(self) -> bool:
+        return self._device.swing_mode
+
+    def oscillate(self, oscillating: bool) -> None:
+        self._device.swing_mode = oscillating
+
+    @property
+    def extra_state_attributes(self) -> dict:
+        return {
+            "swing_angle": self._device.swing_angle,
+            "anion": self._device.anion,
+            "temperature": self._device.temperature,
+            "humidity": self._device.humidity,
+            "indicator_light_brightness": self._device.brightness,
+            "alarm_active": self._device.alarm,
+            "battery": self._device.battery_state,
+            "ac_power": self._device.ac_state,
+            "rpm": self._device.speed_rpm,
+            "physical_controls_locked": self._device.physical_controls_locked,
+        }
+
 
 # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- #
 
