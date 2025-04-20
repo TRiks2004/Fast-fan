@@ -383,7 +383,7 @@ class Fan(FanEntity):
             "ac_power": self._device.environment.is_ac_state,
             "rpm": self._device.environment.speed_rpm,
             "physical_controls_locked": self._device.environment.is_physical_controls_locked,
-            "info": self._device.info.data()
+            "info": self._device.info.data
         }
     
     def update(self):
