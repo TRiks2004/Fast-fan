@@ -370,6 +370,7 @@ class Fan(FanEntity):
         self._device.environment.is_swing_mode = oscillating
         self._device.swing_mode = oscillating
 
+
     @property
     def extra_state_attributes(self) -> dict:
         return {
