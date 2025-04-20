@@ -374,17 +374,7 @@ class Fan(FanEntity):
     @property
     def extra_state_attributes(self) -> dict:
         return {
-            "swing_angle": self._device.environment.swing_angle,
-            "anion": self._device.environment.is_anion,
-            "temperature": self._device.environment.temperature,
-            "humidity": self._device.environment.humidity,
-            "indicator_light_brightness": self._device.environment.brightness,
-            "alarm_active": self._device.environment.is_alarm,
-            "battery": self._device.environment.is_battery_state,
-            "ac_power": self._device.environment.is_ac_state,
-            "rpm": self._device.environment.speed_rpm,
-            "physical_controls_locked": self._device.environment.is_physical_controls_locked,
-            "info": self._device.info.data
+            **self._device.info.data
         }
     
     def update(self):
