@@ -178,17 +178,17 @@ class FanZA5(ModelFanZA5):
             self.model.split('.')
         ))
 
-        self._switches = [FanPowerSwitch, FanSwingModeSwitch, FanAnionSwitch, FanPyhsicalControlLockedSwitch, FanAlarmSwitch]
         self._buttons  = [FanMoveLeftButton, FanMoveRightButton]
+        self._switches = [FanPowerSwitch, FanSwingModeSwitch, FanAnionSwitch, FanPyhsicalControlLockedSwitch, FanAlarmSwitch]
         self._selects  = [FanSpeedLevelSelect] 
         self._numbers  = [FanSwingAngleNumber, FanSpeedPercentNumber, FanBrightnessNumber]
         self._sensors  = [FanSpeedRpmSensor, FanTempSensor, FanHumiditySensor, FanBatterySensor, FanAcStateSensor]
-        self.fan = [Fan]
+        self._fans = [Fan]
 
         self._entitys = [
             self._switches, self._buttons, 
             self._selects, self._numbers, 
-            self._sensors, self.fan
+            self._sensors, self._fans
         ]
     
     def __entity(self, entity: list[any]):
@@ -206,6 +206,29 @@ class FanZA5(ModelFanZA5):
         
         return entitys
 
+    @property
+    def buttons(self) -> list:
+        return self.__entity(self._buttons)
+    
+    @property
+    def switches(self) -> list:
+        return self.__entity(self._switches)
+    
+    @property
+    def selects(self) -> list:
+        return self.__entity(self._selects)
+    
+    @property
+    def numbers(self) -> list:
+        return self.__entity(self._numbers)
+    
+    @property
+    def sensors(self) -> list:
+        return self.__entity(self._sensors)
+
+    @property
+    def fans(self) -> list:
+        return self.__entity(self._fan)
 
     def power_on(self) -> None:
         self.power = True

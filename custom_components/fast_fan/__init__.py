@@ -2,21 +2,26 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.device_registry import async_get as get_dev_reg, DeviceEntryType
 
-from . import fan
+from .model.zhimi_fan.fan import Fan
 from .const import DOMAIN
 
 import logging
 _LOGGER = logging.getLogger(__name__)
 
 PLATFORMS: list[str] = [
-    "entities"
+    "switch",
+    "button",
+    "select",
+    "number",
+    "sensor",
+    "fan"
 ]
 
 async def async_setup_entry(
     hass: HomeAssistant, 
     entry: ConfigEntry
 ) -> bool:
-    _object = fan.Fan(
+    _object = Fan(
         hass, 
         entry.data["ip"], 
         entry.data["token"]
@@ -31,7 +36,6 @@ async def async_setup_entry(
     
     dev_reg = get_dev_reg(hass)
     info = _object.object.info()
-    _LOGGER.error(f"entry: {entry.entry_id} | DOMAIN: {DOMAIN} | mac_address: {info.mac_address}")
     dev_reg.async_get_or_create(
         config_entry_id=entry.entry_id,
         identifiers={(DOMAIN, info.mac_address)},
