@@ -328,6 +328,7 @@ class Fan(FanEntity):
         self._attr_unique_id = f"{self._device.info.mac_address}_fan"
         self._attr_supported_features = (
             FanEntityFeature.SET_SPEED |
+            FanEntityFeature.DIRECTION |
             FanEntityFeature.OSCILLATE |
             FanEntityFeature.PRESET_MODE
         )
