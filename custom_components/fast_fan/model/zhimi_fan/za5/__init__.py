@@ -328,9 +328,10 @@ class Fan(FanEntity):
         self._attr_unique_id = f"{self._device.info.mac_address}_fan"
         self._attr_supported_features = (
             FanEntityFeature.SET_SPEED |
-            FanEntityFeature.DIRECTION |
             FanEntityFeature.OSCILLATE |
-            FanEntityFeature.PRESET_MODE
+            FanEntityFeature.PRESET_MODE |
+            FanEntityFeature.TURN_ON |
+            FanEntityFeature.TURN_OFF
         )
         self._attr_percentage_step = 1
         self._attr_preset_modes = ["1", "2", "3", "4"]
@@ -346,6 +347,14 @@ class Fan(FanEntity):
     def turn_off(self, **kwargs) -> None:
         self._device.environment.is_power = False
         self._device.power_off
+
+    def toggle(self, **kwargs):
+        if self._device.power:
+            self.turn_off()
+        else:
+            self.turn_on()
+
+
 
     @property
     def percentage(self) -> int:
