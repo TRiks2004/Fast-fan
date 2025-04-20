@@ -228,7 +228,7 @@ class FanZA5(ModelFanZA5):
 
     @property
     def fans(self) -> list:
-        return self.__entity(self._fan)
+        return self.__entity(self._fans)
 
     def power_on(self) -> None:
         self.power = True
