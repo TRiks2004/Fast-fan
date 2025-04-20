@@ -9,8 +9,7 @@ import logging
 _LOGGER = logging.getLogger(__name__)
 
 PLATFORMS: list[str] = [
-    "switch", "button", "select", "number",
-    "sensor"
+    "entities"
 ]
 
 async def async_setup_entry(

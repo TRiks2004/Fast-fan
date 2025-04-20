@@ -15,5 +15,8 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback
 ) -> None:
     _object = hass.data[DOMAIN][entry.entry_id]
-    async_add_entities(_object.devices.buttons)
+
+    entitys = _object.devices.entitys
+    for entity in entitys:
+        async_add_entities(entity)
 

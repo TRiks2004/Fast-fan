@@ -183,32 +183,29 @@ class FanZA5(ModelFanZA5):
         self._selects  = [FanSpeedLevelSelect] 
         self._numbers  = [FanSwingAngleNumber, FanSpeedPercentNumber, FanBrightnessNumber]
         self._sensors  = [FanSpeedRpmSensor, FanTempSensor, FanHumiditySensor, FanBatterySensor, FanAcStateSensor]
+        self.fan = [Fan]
 
+        self._entitys = [
+            self._switches, self._buttons, 
+            self._selects, self._numbers, 
+            self._sensors, self.fan
+        ]
+    
     def __entity(self, entity: list[any]):
         return list(map(
             lambda x: x(self),
             entity
         ))
-
+    
     @property
-    def switches(self):
-        return self.__entity(self._switches)
+    def entitys(self) -> list:
+        entitys = []
 
-    @property
-    def buttons(self):
-        return self.__entity(self._buttons)
+        for entity in self._entitys:
+            entitys.extend(self.__entity(entity))
+        
+        return entitys
 
-    @property
-    def selects(self):
-        return self.__entity(self._selects)
-
-    @property
-    def numbers(self):
-        return self.__entity(self._numbers)
-
-    @property
-    def sensors(self):
-        return self.__entity(self._sensors)
 
     def power_on(self) -> None:
         self.power = True
@@ -248,7 +245,7 @@ class FanZA5(ModelFanZA5):
 
 # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- #
 
-class XiaomiFanZA5(FanEntity):
+class Fan(FanEntity):
     def __init__(self, device: FanZA5):
         self._device = device
         self._attr_name = "Xiaomi Smart Fan ZA5"
