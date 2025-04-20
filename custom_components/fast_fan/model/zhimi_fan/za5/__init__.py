@@ -837,7 +837,7 @@ class FanBatterySensor(SensorEntity):
 
     @property
     def native_value(self) -> bool:
-        return self._device.environment.battery
+        return self._device.environment.is_battery_state
 
     @property
     def icon(self):
@@ -856,7 +856,7 @@ class FanBatterySensor(SensorEntity):
         return {"identifiers": {(DOMAIN, self._device.info.mac_address)}}
     
     def update(self):
-        self._device.pull_data()
+        self._device.environment.is_battery_state = self._device.battery_state
 
 class FanAcStateSensor(SensorEntity):
     def __init__(self, fan_device: FanZA5):
