@@ -14,6 +14,8 @@ async def async_setup_entry(
     entry: ConfigEntry,
     async_add_entities: AddEntitiesCallback
 ) -> None:
+    
     _object = hass.data[DOMAIN][entry.entry_id]
+    _LOGGER.error(f"async_setup_entry: DOMAIN: {DOMAIN}, entry.entry_id: {entry.entry_id}, _object.devices.fans: {type(_object.devices.fans)}")
     async_add_entities(_object.devices.fans)
 
