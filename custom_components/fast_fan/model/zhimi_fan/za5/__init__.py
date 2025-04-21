@@ -348,14 +348,6 @@ class Fan(FanEntity):
         self._device.environment.is_power = False
         self._device.power_off
 
-    def toggle(self, **kwargs):
-        if self._device.power:
-            self.turn_off()
-        else:
-            self.turn_on()
-
-
-
     @property
     def percentage(self) -> int:
         return self._device.environment.speed_procent
