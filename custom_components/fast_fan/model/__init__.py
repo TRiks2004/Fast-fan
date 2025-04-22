@@ -2,6 +2,9 @@ from miio import MiotDevice
 import asyncio
 from custom_components.fast_fan.model.spiid import SPIID
 
+import logging
+_LOGGER = logging.getLogger(__name__)
+
 class Device:
 
     def __init__(self, object: MiotDevice) -> None:
@@ -32,6 +35,8 @@ class Device:
         self, *, _command: SPIID,
         value: int | float | bool | str, timeout: int = 1
     ) -> None:
+        
+        _LOGGER.error(f"set_property_by: siid: {_command.siid}, piid: {_command.piid}, value: {value}")
         await asyncio.to_thread(
             self.object.set_property_by,
             siid=_command.siid,
