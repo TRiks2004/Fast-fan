@@ -41,7 +41,6 @@ async def async_setup_entry(
     entity = FanEntity(device)
     entity.upload_entities()
 
-
     hass.data.setdefault(
         DOMAIN, {}
     )[entry.entry_id] = device
@@ -51,7 +50,7 @@ async def async_setup_entry(
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
     dev_reg = get_dev_reg(hass)
-    info = _object.object.info()
+    info = device.info
     dev_reg.async_get_or_create(
         config_entry_id=entry.entry_id,
         identifiers={(DOMAIN, info.mac_address)},
