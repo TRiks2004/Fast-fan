@@ -14,5 +14,5 @@ class FanEntity:
 
     def upload_entities(self):
         for entity in self.object._entities:
-            entity(self)
+            entity(self.object)
     
