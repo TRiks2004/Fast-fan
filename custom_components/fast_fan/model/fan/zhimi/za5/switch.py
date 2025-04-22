@@ -65,6 +65,27 @@ class FanSwingModeSwitch(MySwitchEntity):
     async def async_update(self):
         await self.device.environment.update_swing_mode()
 
+class FanAnionSwitch(MySwitchEntity):
+    
+    name_prefix = "Anion"
+    
+    @property
+    def icon(self):
+        return self.device.icon_anion
+
+    @property
+    def is_on(self):
+        return self.device.environment.is_anion
+
+    async def async_turn_on(self):
+        await self.device.set_anion_on()
+
+    async def async_turn_off(self):
+        await self.device.set_anion_off()
+    
+    async def async_update(self):
+        await self.device.environment.update_anion()
+
 # class FanAnionSwitch(SwitchEntity):
     
 #     def __init__(self, fan_device: FanZhimiZA5):

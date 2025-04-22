@@ -60,6 +60,9 @@ class EnvironmentFanZA5:
     async def update_swing_mode(self):
         self.is_swing_mode = await self.object.swing_mode
 
+    async def update_anion(self):
+        self.is_anion = await self.object.anion
+
 prefix_mdi = "mdi:"
 @dataclass(frozen=True)
 class Icon:
@@ -73,6 +76,11 @@ class Icon:
     class SwingMode:
         on = f"{prefix_mdi}autorenew"
         off = f"{prefix_mdi}autorenew-off"
+    
+    @dataclass(frozen=True)
+    class Anion:
+        on = f"{prefix_mdi}blur"
+        off = f"{prefix_mdi}blur-off"
     
 
 class FanZhimiZA5(FanZhimi):
@@ -221,16 +229,20 @@ class FanZhimiZA5(FanZhimi):
     # -- # ---- # -- # ---- # -- # ---- # -- # ---- # -- # ---- # -- # ---- # -- #
 
     @property
+    def icon_anion(self):
+        return Icon.Anion.on if self.environment.is_anion else Icon.Anion.off
+
+    @property
     async def anion(self) -> bool:
         return await self._get(_command=SPIIDFanXiaomiZA5.Fan.anion)
     
     async def set_anion(self, value: bool) -> None:
         await self._set(_command=SPIIDFanXiaomiZA5.Fan.anion, value=value)
 
-    async def anion_on(self) -> None:
+    async def set_anion_on(self) -> None:
         await self.set_anion(True)
 
-    async def anion_off(self) -> None:
+    async def set_anion_off(self) -> None:
         await self.set_anion(False)
 
     # -- # ---- # -- # ---- # -- # ---- # -- # ---- # -- # ---- # -- # ---- # -- #
