@@ -13,6 +13,6 @@ class FanEntity:
         self.upload_entities()
 
     def upload_entities(self):
-        for entity in self._entities:
+        for entity in self.object._entities:
             entity(self)
     
