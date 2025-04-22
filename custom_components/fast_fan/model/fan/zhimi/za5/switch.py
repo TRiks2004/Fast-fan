@@ -3,11 +3,12 @@ from custom_components.fast_fan.const import DOMAIN
 from custom_components.fast_fan.model.fan.zhimi.za5 import FanZhimiZA5
 
 
-class FanPowerSwitch(SwitchEntity):
+class MySwitchEntity(SwitchEntity):
+    name_prefix: str = None
+    
     def __init__(self, device: FanZhimiZA5):
         self.device = device
         self.device._switchs_entities.append(self)
-        self.name_prefix = "Power"
 
     @property
     def unique_id(self):
@@ -21,13 +22,39 @@ class FanPowerSwitch(SwitchEntity):
     def name(self):
         return f"{self.device.name} {self.name_prefix}"
 
+class FanPowerSwitch(MySwitchEntity):
+
+    name_prefix = "Power"
+
     @property
     def icon(self):
         return self.device.icon_power
 
     @property
     def is_on(self):
-        return self.device.environment.is_power
+        return self.device.environment.is_swing_mode
+
+    async def async_turn_on(self):
+        await self.device.set_swing_mode_on()
+
+    async def async_turn_off(self):
+        await self.device.set_swing_mode_off()
+    
+    async def async_update(self):
+        await self.device.environment.update_power()
+
+
+class FanSwingModeSwitch(MySwitchEntity):
+    
+    name_prefix = "Swing Mode"
+    
+    @property
+    def icon(self):
+        return self.device.icon_swing_mode
+
+    @property
+    def is_on(self):
+        return self.device.environment.is_swing_mode
 
     async def async_turn_on(self):
         await self.device.set_power_on()
@@ -36,41 +63,7 @@ class FanPowerSwitch(SwitchEntity):
         await self.device.set_power_off()
     
     async def async_update(self):
-        await self.device.environment.update_power()
-
-# class FanSwingModeSwitch(SwitchEntity):
-#     def __init__(self, fan_device: FanZhimiZA5):
-#         self._device = fan_device
-#         self._name = f"Fan Swing Mode {self._device.name}"
-
-#     @property
-#     def name(self):
-#         return self._name
-
-#     @property
-#     def is_on(self):
-#         return self._device.environment.is_swing_mode
-
-#     def turn_on(self):
-#         self._device.swing_mode_on()
-
-#     def turn_off(self):
-#         self._device.swing_mode_off()
-
-#     @property
-#     def unique_id(self):
-#         return f"{self._device.info.mac_address}_swing_mode"
-
-#     @property
-#     def device_info(self):
-#         return {"identifiers": {(DOMAIN, self._device.info.mac_address)}}
-
-#     @property
-#     def icon(self):
-#         return "mdi:sync" if self.is_on else "mdi:circle-outline"
-    
-#     def update(self):
-#         self._device.environment.is_swing_mode = self._device.swing_mode
+        await self.device.environment.update_swing_mode()
 
 # class FanAnionSwitch(SwitchEntity):
     

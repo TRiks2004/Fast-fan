@@ -57,6 +57,9 @@ class EnvironmentFanZA5:
     async def update_power(self):
         self.is_power = await self.object.power  
 
+    async def update_swing_mode(self):
+        self.is_swing_mode = await self.object.swing_mode
+
 prefix_mdi = "mdi:"
 @dataclass(frozen=True)
 class Icon:
@@ -66,6 +69,10 @@ class Icon:
         on = f"{prefix_mdi}fan"
         off = f"{prefix_mdi}fan-off"
     
+    @dataclass(frozen=True)
+    class SwingMode:
+        on = f"{prefix_mdi}autorenew"
+        off = f"{prefix_mdi}autorenew-off"
     
 
 class FanZhimiZA5(FanZhimi):
@@ -126,16 +133,20 @@ class FanZhimiZA5(FanZhimi):
     # -- # ---- # -- # ---- # -- # ---- # -- # ---- # -- # ---- # -- # ---- # -- #
 
     @property
+    def icon_swing_mode(self):
+        return Icon.SwingMode.on if self.environment.is_swing_mode else Icon.SwingMode.off
+
+    @property
     async def swing_mode(self) -> bool:
         return await self._get(_command=SPIIDFanXiaomiZA5.Fan.swing_mode)
     
     async def set_swing_mode(self, value: bool) -> None:
         await self._set(_command=SPIIDFanXiaomiZA5.Fan.swing_mode, value=value)
     
-    async def swing_mode_on(self) -> None:
+    async def set_swing_mode_on(self) -> None:
         await self.set_swing_mode(True)
 
-    async def swing_mode_off(self) -> None:
+    async def set_swing_mode_off(self) -> None:
         await self.set_swing_mode(False)
 
     # -- # ---- # -- # ---- # -- # ---- # -- # ---- # -- # ---- # -- # ---- # -- #
