@@ -15,7 +15,7 @@ class FanPowerSwitch(SwitchEntity):
 
     @property
     def device_info(self):
-        return {"identifiers": {(DOMAIN, self._device.info.mac_address)}}
+        return {"identifiers": {(DOMAIN, self.device.info.mac_address)}}
 
     @property
     def name(self):
