@@ -11,7 +11,7 @@ class FanPowerSwitch(SwitchEntity):
 
     @property
     def unique_id(self):
-        return f"{self._device.info.mac_address}_{self.name_prefix.lower()}"
+        return f"{self.device.info.mac_address}_{self.name_prefix.lower()}"
 
     @property
     def device_info(self):
