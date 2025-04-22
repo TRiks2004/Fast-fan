@@ -63,6 +63,12 @@ class EnvironmentFanZA5:
     async def update_anion(self):
         self.is_anion = await self.object.anion
 
+    async def update_physical_controls_locked(self):
+        self.is_physical_controls_locked = await self.object.physical_controls_locked
+
+    async def update_alarm(self):
+        self.is_alarm = await self.object.alarm
+
 prefix_mdi = "mdi:"
 @dataclass(frozen=True)
 class Icon:
@@ -81,6 +87,16 @@ class Icon:
     class Anion:
         on = f"{prefix_mdi}blur"
         off = f"{prefix_mdi}blur-off"
+    
+    @dataclass(frozen=True)
+    class PhysicalControlsLocked:
+        on = f"{prefix_mdi}lock-outline"
+        off = f"{prefix_mdi}lock-open-variant-outline"
+
+    @dataclass(frozen=True)
+    class Alarm:
+        on = f"{prefix_mdi}bell-outline"
+        off = f"{prefix_mdi}bell-off-outline"
     
 
 class FanZhimiZA5(FanZhimi):
@@ -306,11 +322,21 @@ class FanZhimiZA5(FanZhimi):
     # -- # ---- # -- # ---- # -- # ---- # -- # ---- # -- # ---- # -- # ---- # -- #
 
     @property
+    def icon_physical_controls_locked(self):
+        return Icon.PhysicalControlsLocked.on if self.physical_controls_locked else Icon.PhysicalControlsLocked.off
+
+    @property
     async def physical_controls_locked(self) -> bool:
         return await self._get(_command=SPIIDFanXiaomiZA5.PhysicalControlLocked.physical_controls_locked)
     
     async def set_physical_controls_locked(self, value: bool) -> None:
         await self._set(_command=SPIIDFanXiaomiZA5.PhysicalControlLocked.physical_controls_locked, value=value)
+
+    async def set_physical_controls_locked_on(self) -> None:
+        await self.set_physical_controls_locked(True)
+
+    async def set_physical_controls_locked_off(self) -> None:
+        await self.set_physical_controls_locked(False)
 
     # -- # ---- # -- # ---- # -- # ---- # -- # ---- # -- # ---- # -- # ---- # -- #
 
@@ -331,8 +357,18 @@ class FanZhimiZA5(FanZhimi):
     # -- # ---- # -- # ---- # -- # ---- # -- # ---- # -- # ---- # -- # ---- # -- #
 
     @property
+    def icon_alarm(self):
+        return Icon.Alarm.on if self.alarm else Icon.Alarm.off
+
+    @property
     async def alarm(self) -> bool:
         return await self._get(_command=SPIIDFanXiaomiZA5.Alarm.alarm)
     
     async def set_alarm(self, value: bool) -> None:
         await self._set(_command=SPIIDFanXiaomiZA5.Alarm.alarm, value=value)
+
+    async def set_alarm_on(self) -> None:
+        await self.set_alarm(True)
+
+    async def set_alarm_off(self) -> None:
+        await self.set_alarm(False)

@@ -5,7 +5,9 @@ class FanEntity:
     def __init__(self, object: FanZhimiZA5) -> None:
         self.object = object
 
-        entities = [switch.FanPowerSwitch, switch.FanSwingModeSwitch, switch.FanAnionSwitch]
+        entities = [
+            switch.FanPowerSwitch, switch.FanSwingModeSwitch, switch.FanAnionSwitch, switch.FanPyhsicalControlLockedSwitch, switch.FanAlarmSwitch,
+        ]
         
         for obj in entities:
             self.object._entities.append(obj)
