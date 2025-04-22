@@ -32,13 +32,13 @@ class FanPowerSwitch(MySwitchEntity):
 
     @property
     def is_on(self):
-        return self.device.environment.is_swing_mode
+        return self.device.environment.is_power
 
     async def async_turn_on(self):
-        await self.device.set_swing_mode_on()
+        await self.device.set_power_on()
 
     async def async_turn_off(self):
-        await self.device.set_swing_mode_off()
+        await self.device.set_power_off()
     
     async def async_update(self):
         await self.device.environment.update_power()
