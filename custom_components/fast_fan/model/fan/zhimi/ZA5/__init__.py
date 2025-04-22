@@ -84,7 +84,7 @@ class FanZhimiZA5(FanZhimi):
         super().__init__(object)
         self.name = "Fan Zhimi ZA5"
         self._entities = []
-        self.environment = EnvironmentFanZA5()
+        self.environment = EnvironmentFanZA5(self)
 
         self._switchs_entities = [] 
     
