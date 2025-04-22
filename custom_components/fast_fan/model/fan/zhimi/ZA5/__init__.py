@@ -3,7 +3,6 @@ from typing import Literal
 from custom_components.fast_fan.model.fan.zhimi import FanZhimi
 from miio import MiotDevice
 
-from custom_components.fast_fan.model.fan.zhimi.ZA5 import switch
 from custom_components.fast_fan.model.spiid.fan_xiaomi_za5 import SPIIDFanXiaomiZA5
 
 LAVELS = Literal[1, 2, 3, 4]
@@ -84,22 +83,13 @@ class FanZhimiZA5(FanZhimi):
     def __init__(self, object: MiotDevice) -> None:
         super().__init__(object)
         self.name = "Fan Zhimi ZA5"
+        self._entities = []
         self.environment = EnvironmentFanZA5()
 
         self._switchs_entities = [] 
-
-        self._entities = [
-            switch.FanPowerSwitch,
-        ]
-
-        self.upload_entities()
-
+    
     # -- # ---- # -- # ---- # -- # ---- # -- # ---- # -- # ---- # -- # ---- # -- #
-
-    def upload_entities(self):
-        for entity in self._entities:
-            entity(self)
-
+    
     @property
     def switchs(self):
         return self._switchs_entities

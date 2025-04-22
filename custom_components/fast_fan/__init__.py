@@ -3,6 +3,8 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.device_registry import async_get as get_dev_reg, DeviceEntryType
 
 from custom_components.fast_fan.model import Device
+from custom_components.fast_fan.model.fan.zhimi.ZA5 import FanZhimiZA5
+from custom_components.fast_fan.model.fan.zhimi.ZA5.ent import FanEntity
 
 from .const import DOMAIN
 
@@ -27,18 +29,27 @@ async def async_setup_entry(
 
     _object = MiotDevice(ip=ip, token=token)
     _device = Device(_object)
-    device = _device.pull_data()
+    device = None
     
+    match _device.info.model.lower():
+        case "zhimi.fan.za5":
+            device = FanZhimiZA5(object=_object)
+
     if device is None:
         raise Exception("Device not found")
+
+    entity = FanEntity(device)
+    entity.upload_entities()
+
 
     hass.data.setdefault(
         DOMAIN, {}
     )[entry.entry_id] = device
 
     await device.environment.upload_data()
-    await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     
+    await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
+
     dev_reg = get_dev_reg(hass)
     info = _object.object.info()
     dev_reg.async_get_or_create(

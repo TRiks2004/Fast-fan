@@ -3,8 +3,6 @@ from custom_components.fast_fan.const import DOMAIN
 
 
 class FanPowerSwitch(SwitchEntity):
-    from custom_components.fast_fan.model.fan.zhimi.ZA5 import FanZhimiZA5
-    
     def __init__(self, device: FanZhimiZA5):
         self.device = device
         self.device._switchs_entities.append(self)

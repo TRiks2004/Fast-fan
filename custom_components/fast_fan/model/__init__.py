@@ -3,22 +3,12 @@ import asyncio
 from custom_components.fast_fan.model.spiid import SPIID
 
 class Device:
-    from custom_components.fast_fan.model.fan.zhimi.ZA5 import FanZhimiZA5
-    
+
     def __init__(self, object: MiotDevice) -> None:
         self.object = object
         self.info = self.object.info()
 
         self.manufacturer, self.device, self.model, *obj = self.info.model.split(".")
-
-    def pull_data(self):
-        match self.device.lower():
-            case "fan":
-                match self.manufacturer.lower():
-                    case "zhimi":
-                        match self.model.lower():
-                            case "za5":
-                                return FanZhimiZA5(object=self.object)
                         
 
     async def _get(
