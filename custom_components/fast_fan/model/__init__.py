@@ -1,10 +1,9 @@
 from miio import MiotDevice
 import asyncio
-
-from custom_components.fast_fan.model.fan.zhimi.ZA5 import FanZhimiZA5
 from custom_components.fast_fan.model.spiid import SPIID
 
 class Device:
+    from custom_components.fast_fan.model.fan.zhimi.ZA5 import FanZhimiZA5
     
     def __init__(self, object: MiotDevice) -> None:
         self.object = object
