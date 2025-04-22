@@ -2,36 +2,41 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.device_registry import async_get as get_dev_reg, DeviceEntryType
 
-from .model.zhimi_fan.fan import Fan
+from custom_components.fast_fan.model import Device
+
 from .const import DOMAIN
+
+from miio import MiotDevice
 
 import logging
 _LOGGER = logging.getLogger(__name__)
 
 PLATFORMS: list[str] = [
-    "switch",
-    "button",
-    "select",
-    "number",
-    "sensor",
-    "fan"
+    "switch", 
 ]
+
+# "button", "select",
+#     "number", "sensor", "fan"
 
 async def async_setup_entry(
     hass: HomeAssistant, 
     entry: ConfigEntry
 ) -> bool:
-    _object = Fan(
-        hass, 
-        entry.data["ip"], 
-        entry.data["token"]
-    )
+    ip = entry.data["ip"]
+    token = entry.data["token"]
+
+    _object = MiotDevice(ip=ip, token=token)
+    _device = Device(_object)
+    device = _device.pull_data()
     
+    if device is None:
+        raise Exception("Device not found")
+
     hass.data.setdefault(
         DOMAIN, {}
-    )[entry.entry_id] = _object
+    )[entry.entry_id] = device
 
-    await hass.async_add_executor_job(_object.pull_data)
+    await device.environment.upload_data()
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     
     dev_reg = get_dev_reg(hass)
