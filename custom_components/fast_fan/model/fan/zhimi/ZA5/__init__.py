@@ -284,16 +284,16 @@ class FanZhimiZA5(FanZhimi):
 
     @property
     async def physical_controls_locked(self) -> bool:
-        return await self._get(_command=SPIIDFanXiaomiZA5.CustomService.physical_controls_locked)
+        return await self._get(_command=SPIIDFanXiaomiZA5.PhysicalControlLocked.physical_controls_locked)
     
     async def set_physical_controls_locked(self, value: bool) -> None:
-        await self._set(_command=SPIIDFanXiaomiZA5.CustomService.physical_controls_locked, value=value)
+        await self._set(_command=SPIIDFanXiaomiZA5.PhysicalControlLocked.physical_controls_locked, value=value)
 
     # -- # ---- # -- # ---- # -- # ---- # -- # ---- # -- # ---- # -- # ---- # -- #
 
     @property
     async def brightness(self) -> int:
-        return await self._get(_command=SPIIDFanXiaomiZA5.CustomService.brightness)
+        return await self._get(_command=SPIIDFanXiaomiZA5.IndicatorLight.brightness)
     
     async def set_brightness(self, value: int) -> None:
         if (value < self.brightness_confines[0]) or (value > self.brightness_confines[1]):
@@ -303,13 +303,13 @@ class FanZhimiZA5(FanZhimi):
                 f"{self.brightness_confines[1]}; " + 
                 f"current value: {value}"
         )
-        await self._set(_command=SPIIDFanXiaomiZA5.CustomService.brightness, value=value)
+        await self._set(_command=SPIIDFanXiaomiZA5.IndicatorLight.brightness, value=value)
 
     # -- # ---- # -- # ---- # -- # ---- # -- # ---- # -- # ---- # -- # ---- # -- #
 
     @property
     async def alarm(self) -> bool:
-        return await self._get(_command=SPIIDFanXiaomiZA5.CustomService.alarm)
+        return await self._get(_command=SPIIDFanXiaomiZA5.Alarm.alarm)
     
     async def set_alarm(self, value: bool) -> None:
-        await self._set(_command=SPIIDFanXiaomiZA5.CustomService.alarm, value=value)
+        await self._set(_command=SPIIDFanXiaomiZA5.Alarm.alarm, value=value)
