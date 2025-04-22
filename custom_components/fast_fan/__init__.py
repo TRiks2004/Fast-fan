@@ -3,8 +3,8 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.device_registry import async_get as get_dev_reg, DeviceEntryType
 
 from custom_components.fast_fan.model import Device
-from custom_components.fast_fan.model.fan.zhimi.ZA5 import FanZhimiZA5
-from custom_components.fast_fan.model.fan.zhimi.ZA5.ent import FanEntity
+from custom_components.fast_fan.model.fan.zhimi.za5 import FanZhimiZA5
+from custom_components.fast_fan.model.fan.zhimi.za5.ent import FanEntity
 
 from .const import DOMAIN
 

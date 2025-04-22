@@ -1,6 +1,6 @@
 from homeassistant.components.switch import SwitchEntity
 from custom_components.fast_fan.const import DOMAIN
-from custom_components.fast_fan.model.fan.zhimi.ZA5 import FanZhimiZA5
+from custom_components.fast_fan.model.fan.zhimi.za5 import FanZhimiZA5
 
 
 class FanPowerSwitch(SwitchEntity):

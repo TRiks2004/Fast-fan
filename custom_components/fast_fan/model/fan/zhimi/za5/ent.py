@@ -1,4 +1,4 @@
-from custom_components.fast_fan.model.fan.zhimi.ZA5 import FanZhimiZA5, switch
+from custom_components.fast_fan.model.fan.zhimi.za5 import FanZhimiZA5, switch
 
 
 class FanEntity:
