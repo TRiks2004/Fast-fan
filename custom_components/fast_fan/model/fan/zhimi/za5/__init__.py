@@ -332,8 +332,8 @@ class FanZhimiZA5(FanZhimi):
     
     @property
     async def power_source(self):
-        battery = self.battery_state
-        ac = self.ac_state
+        battery = await self.battery_state
+        ac = await self.ac_state
         if battery and not ac:
             return "battery"
         elif not battery and ac:
