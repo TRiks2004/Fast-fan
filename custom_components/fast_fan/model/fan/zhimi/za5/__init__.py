@@ -420,7 +420,7 @@ class FanZhimiZA5(FanZhimi):
 
     @property
     def icon_humidity(self):
-        return Icon.Humidity.humidity
+        return Icon.Humidity.water
 
     @property
     async def humidity(self) -> float:
