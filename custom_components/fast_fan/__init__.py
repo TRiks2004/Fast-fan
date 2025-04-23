@@ -14,11 +14,11 @@ import logging
 _LOGGER = logging.getLogger(__name__)
 
 PLATFORMS: list[str] = [
-    "switch", 
+    "switch", "sensor"
 ]
 
 # "button", "select",
-#     "number", "sensor", "fan"
+#     "number", "", "fan"
 
 async def async_setup_entry(
     hass: HomeAssistant, 

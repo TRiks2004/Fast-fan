@@ -54,6 +54,8 @@ class EnvironmentFanZA5:
         self.speed_procent = await self.object.speed_procent
         self.brightness = await self.object.brightness
 
+    # -- # ---- # -- # ---- # -- # ---- # -- # ---- # -- # ---- # -- # ---- # -- #
+
     async def update_power(self):
         self.is_power = await self.object.power  
 
@@ -68,6 +70,11 @@ class EnvironmentFanZA5:
 
     async def update_alarm(self):
         self.is_alarm = await self.object.alarm
+
+    # -- # ---- # -- # ---- # -- # ---- # -- # ---- # -- # ---- # -- # ---- # -- #
+
+    async def update_speed_rpm(self):
+        self.speed_rpm = await self.object.speed_rpm
 
 prefix_mdi = "mdi:"
 @dataclass(frozen=True)
@@ -98,6 +105,14 @@ class Icon:
         on = f"{prefix_mdi}bell-outline"
         off = f"{prefix_mdi}bell-off-outline"
     
+    @dataclass(frozen=True)
+    class SpeedRpm:
+        off = f"{prefix_mdi}fan-off"
+        
+        fan_speed = 3
+        fan_speed_1 = f"{prefix_mdi}fan-speed-1"
+        fan_speed_2 = f"{prefix_mdi}fan-speed-2"
+        fan_speed_3 = f"{prefix_mdi}fan-speed-3"
 
 class FanZhimiZA5(FanZhimi):
     lavels_confines = (1, 2, 3, 4)
@@ -111,6 +126,8 @@ class FanZhimiZA5(FanZhimi):
         0: "Природный",
     }
 
+    max_speed_rpm = 909
+
     def __init__(self, object: MiotDevice) -> None:
         super().__init__(object)
         self.name = "Fan Zhimi ZA5"
@@ -118,12 +135,19 @@ class FanZhimiZA5(FanZhimi):
         self.environment = EnvironmentFanZA5(self)
 
         self._switchs_entities = [] 
+        self._sensors_entities = []
     
     # -- # ---- # -- # ---- # -- # ---- # -- # ---- # -- # ---- # -- # ---- # -- #
     
     @property
     def switchs(self):
         return self._switchs_entities
+    
+    @property
+    def sensors(self):
+        return self._sensors_entities
+
+    # -- # ---- # -- # ---- # -- # ---- # -- # ---- # -- # ---- # -- # ---- # -- #
 
     @property
     async def power(self) -> bool:
@@ -281,6 +305,25 @@ class FanZhimiZA5(FanZhimi):
     # -- # ---- # -- # ---- # -- # ---- # -- # ---- # -- # ---- # -- # ---- # -- #
 
     @property
+    def icon_speed_rpm(self):
+        rpm = self.environment.speed_rpm
+
+        if rpm == 0:
+            return Icon.SpeedRpm.off
+        
+        icon = [Icon.SpeedRpm.fan_speed_1, Icon.SpeedRpm.fan_speed_2, Icon.SpeedRpm.fan_speed_3]
+
+        step = self.max_speed_rpm / len(icon)
+
+        for i, value in enumerate(icon):
+            if rpm <= (i + 1) * step:
+                return value
+
+    @property
+    def unit_speed_rpm(self):
+        return "RPM"
+
+    @property
     async def speed_rpm(self) -> int:
         return await self._get(_command=SPIIDFanXiaomiZA5.CustomService.speed_rpm)
 
@@ -323,7 +366,7 @@ class FanZhimiZA5(FanZhimi):
 
     @property
     def icon_physical_controls_locked(self):
-        return Icon.PhysicalControlsLocked.on if self.physical_controls_locked else Icon.PhysicalControlsLocked.off
+        return Icon.PhysicalControlsLocked.on if self.environment.is_physical_controls_locked else Icon.PhysicalControlsLocked.off
 
     @property
     async def physical_controls_locked(self) -> bool:
@@ -358,7 +401,7 @@ class FanZhimiZA5(FanZhimi):
 
     @property
     def icon_alarm(self):
-        return Icon.Alarm.on if self.alarm else Icon.Alarm.off
+        return Icon.Alarm.on if self.environment.is_alarm else Icon.Alarm.off
 
     @property
     async def alarm(self) -> bool:

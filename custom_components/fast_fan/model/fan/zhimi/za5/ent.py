@@ -1,4 +1,4 @@
-from custom_components.fast_fan.model.fan.zhimi.za5 import FanZhimiZA5, switch
+from custom_components.fast_fan.model.fan.zhimi.za5 import FanZhimiZA5, switch, sensor
 
 
 class FanEntity:
@@ -7,6 +7,7 @@ class FanEntity:
 
         entities = [
             switch.FanPowerSwitch, switch.FanSwingModeSwitch, switch.FanAnionSwitch, switch.FanPyhsicalControlLockedSwitch, switch.FanAlarmSwitch,
+            sensor.FanSpeedRpmSensor,
         ]
         
         for obj in entities:
