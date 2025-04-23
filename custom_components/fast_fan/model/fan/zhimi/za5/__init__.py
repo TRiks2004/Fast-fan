@@ -311,13 +311,13 @@ class FanZhimiZA5(FanZhimi):
         if rpm == 0:
             return Icon.SpeedRpm.off
         
-        icon = [Icon.SpeedRpm.fan_speed_1, Icon.SpeedRpm.fan_speed_2, Icon.SpeedRpm.fan_speed_3]
+        icon = [(436, Icon.SpeedRpm.fan_speed_1), (731, Icon.SpeedRpm.fan_speed_2), (909, Icon.SpeedRpm.fan_speed_3)]
 
         step = self.max_speed_rpm / len(icon)
 
         for i, value in enumerate(icon):
-            if rpm <= (i + 1) * step:
-                return value
+            if rpm <= value[0]:
+                return value[1]
 
     @property
     def unit_speed_rpm(self):
