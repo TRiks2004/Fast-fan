@@ -1,4 +1,5 @@
 from homeassistant.components.sensor import SensorEntity
+from homeassistant.components.sensor import SensorDeviceClass
 
 from custom_components.fast_fan.const import DOMAIN
 from custom_components.fast_fan.model.fan.zhimi.za5 import FanZhimiZA5
@@ -41,132 +42,60 @@ class FanSpeedRpmSensor(MySensorEntity):
     async def async_update(self):
         await self.device.environment.update_speed_rpm()
 
-# class FanTempSensor(SensorEntity):
-#     def __init__(self, fan_device: FanZA5):
-#         self._device = fan_device
-#         self._name = f"Fan Temp {self._device.name}"
+class FanTempSensor(MySensorEntity):
+    name_prefix: str = "Temperature"
 
-#     @property
-#     def name(self):
-#         return self._name
+    @property
+    def native_value(self):
+        return self.device.environment.temperature
 
-#     @property
-#     def native_value(self):
-#         return self._device.environment.temperature
-
-#     @property
-#     def native_unit_of_measurement(self):
-#         return "°C"
-
-#     @property
-#     def icon(self):
-#         return "mdi:thermometer"
-
-#     @property
-#     def unique_id(self):
-#         return f"{self._device.info.mac_address}_temperature"
-
-#     @property
-#     def device_info(self):
-#         return {"identifiers": {(DOMAIN, self._device.info.mac_address)}}
+    @property
+    def native_unit_of_measurement(self):
+        return "°C"
     
-#     def update(self):
-#         self._device.environment.temperature = self._device.temperature
+    @property
+    def device_class(self):
+        return SensorDeviceClass.TEMPERATURE
+
+    @property
+    def icon(self):
+        return self.device.icon_temperature
     
-# class FanHumiditySensor(SensorEntity):
-#     def __init__(self, fan_device: FanZA5):
-#         self._device = fan_device
-#         self._name = f"Fan Humidity {self._device.name}"
+    async def async_update(self):
+        await self.device.environment.update_temperature()
 
-#     @property
-#     def name(self):
-#         return self._name
+class FanHumiditySensor(MySensorEntity):
+    name_prefix: str = "Humidity"
 
-#     @property
-#     def native_value(self):
-#         return self._device.environment.humidity
+    @property
+    def native_value(self):
+        return self.device.environment.humidity
 
-#     @property
-#     def native_unit_of_measurement(self):
-#         return "%"
-
-#     @property
-#     def icon(self):
-#         return "mdi:water-percent"
-
-#     @property
-#     def unique_id(self):
-#         return f"{self._device.info.mac_address}_humidity"
-
-#     @property
-#     def device_info(self):
-#         return {"identifiers": {(DOMAIN, self._device.info.mac_address)}}
+    @property
+    def native_unit_of_measurement(self):
+        return "%"
     
-#     def update(self):
-#         self._device.environment.humidity = self._device.humidity
+    @property
+    def device_class(self):
+        return SensorDeviceClass.HUMIDITY
+
+    @property
+    def icon(self):
+        return self.device.icon_humidity
     
-# class FanBatterySensor(SensorEntity):
-#     def __init__(self, fan_device: FanZA5):
-#         self._device = fan_device
-#         self._name = f"Fan Battery State {self._device.name}"
+    async def async_update(self):
+        await self.device.environment.update_humidity()
 
-#     @property
-#     def name(self):
-#         return self._name
+class FanPowerSourceSensor(MySensorEntity):
+    name_prefix: str = "Power Source"
 
-#     @property
-#     def native_value(self) -> bool:
-#         return self._device.environment.is_battery_state
+    @property
+    def native_value(self):
+        return self.device.environment.power_source
 
-#     @property
-#     def icon(self):
-#         return "mdi:battery" if self.native_value else "mdi:battery-off"
+    @property
+    def icon(self):
+        return self.device.icon_power_source
 
-#     @property
-#     def device_class(self):
-#         return "battery"
-
-#     @property
-#     def unique_id(self):
-#         return f"{self._device.info.mac_address}_battery"
-
-#     @property
-#     def device_info(self):
-#         return {"identifiers": {(DOMAIN, self._device.info.mac_address)}}
-    
-#     def update(self):
-#         self._device.environment.is_battery_state = self._device.battery_state
-
-# class FanAcStateSensor(SensorEntity):
-#     def __init__(self, fan_device: FanZA5):
-#         self._device = fan_device
-#         self._name = f"AC Power {self._device.name}"
-
-#     @property
-#     def name(self):
-#         return self._name
-
-#     @property
-#     def native_value(self) -> bool:
-#         return self._device.environment.is_ac_state
-
-#     @property
-#     def icon(self):
-#         return "mdi:power-plug-outline" if self.native_value else "mdi:power-plug-off-outline"
-
-#     @property
-#     def device_class(self):
-#         return "power"
-
-#     @property
-#     def unique_id(self):
-#         return f"{self._device.info.mac_address}_ac_state"
-
-#     @property
-#     def device_info(self):
-#         _LOGGER.error(f"ac_state: {self._device.ac_state} | DOMAIN: {DOMAIN} | mac_address: {self._device.info.mac_address}")
-#         return {"identifiers": {(DOMAIN, self._device.info.mac_address)}}
-    
-#     def update(self):
-#         self._device.pull_data()
-
+    async def async_update(self):
+        await self.device.environment.update_power_source()

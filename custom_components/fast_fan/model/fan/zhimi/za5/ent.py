@@ -7,7 +7,7 @@ class FanEntity:
 
         entities = [
             switch.FanPowerSwitch, switch.FanSwingModeSwitch, switch.FanAnionSwitch, switch.FanPyhsicalControlLockedSwitch, switch.FanAlarmSwitch,
-            sensor.FanSpeedRpmSensor,
+            sensor.FanSpeedRpmSensor, sensor.FanTempSensor, sensor.FanHumiditySensor, sensor.FanPowerSourceSensor,
         ]
         
         for obj in entities:

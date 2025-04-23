@@ -16,8 +16,7 @@ class EnvironmentFanZA5:
     is_physical_controls_locked: bool
     is_alarm: bool
 
-    is_battery_state: bool
-    is_ac_state: bool
+    power_source: str
 
     temperature: float
     humidity: int
@@ -40,8 +39,7 @@ class EnvironmentFanZA5:
         self.is_physical_controls_locked = await self.object.physical_controls_locked
         self.is_alarm = await self.object.alarm
 
-        self.is_battery_state = await self.object.battery_state
-        self.is_ac_state = await self.object.ac_state
+        self.power_source = await self.object.power_source
 
         self.temperature = await self.object.temperature
         self.humidity = await self.object.humidity
@@ -76,9 +74,28 @@ class EnvironmentFanZA5:
     async def update_speed_rpm(self):
         self.speed_rpm = await self.object.speed_rpm
 
+    async def update_battery_state(self):
+        self.is_battery_state = await self.object.battery_state
+
+    async def update_ac_state(self):
+        self.is_ac_state = await self.object.ac_state
+
+    async def update_power_source(self):
+        self.power_source = await self.object.power_source
+
+    async def update_temperature(self):
+        self.temperature = await self.object.temperature
+
+    async def update_humidity(self):
+        self.humidity = await self.object.humidity
+
+
+
 prefix_mdi = "mdi:"
 @dataclass(frozen=True)
 class Icon:
+
+    # -- # ---- # -- # ---- # -- # ---- # -- # ---- # -- # ---- # -- # ---- # -- #
 
     @dataclass(frozen=True)
     class Power:
@@ -105,6 +122,8 @@ class Icon:
         on = f"{prefix_mdi}bell-outline"
         off = f"{prefix_mdi}bell-off-outline"
     
+    # -- # ---- # -- # ---- # -- # ---- # -- # ---- # -- # ---- # -- # ---- # -- #
+
     @dataclass(frozen=True)
     class SpeedRpm:
         off = f"{prefix_mdi}fan-off"
@@ -113,6 +132,22 @@ class Icon:
         fan_speed_1 = f"{prefix_mdi}fan-speed-1"
         fan_speed_2 = f"{prefix_mdi}fan-speed-2"
         fan_speed_3 = f"{prefix_mdi}fan-speed-3"
+
+    @dataclass(frozen=True)
+    class Humidity:
+        water = f"{prefix_mdi}water-outline"
+
+    @dataclass(frozen=True)
+    class Temperature:
+        thermometer = f"{prefix_mdi}thermometer-lines"
+
+    @dataclass(frozen=True)
+    class PowerSource:
+        battery =    f"{prefix_mdi}battery-high"
+        ac =         f"{prefix_mdi}power-plug-outline"
+        battery_ac = f"{prefix_mdi}power-plug-battery-outline"
+
+    # -- # ---- # -- # ---- # -- # ---- # -- # ---- # -- # ---- # -- # ---- # -- #
 
 class FanZhimiZA5(FanZhimi):
     lavels_confines = (1, 2, 3, 4)
@@ -291,6 +326,33 @@ class FanZhimiZA5(FanZhimi):
     async def battery_state(self) -> bool:
         return await self._get(_command=SPIIDFanXiaomiZA5.CustomService.battery_state)
 
+    @property
+    async def ac_state(self):
+        return await self._get(_command=SPIIDFanXiaomiZA5.CustomService.ac_state)
+    
+    @property
+    async def power_source(self):
+        battery = self.battery_state
+        ac = self.ac_state
+        if battery and not ac:
+            return "battery"
+        elif not battery and ac:
+            return "ac"
+        elif battery and ac:
+            return "battery+ac"
+        return "unknown"
+
+    @property
+    def icon_power_source(self):
+        val = self.environment.power_source
+        if val == "battery":
+            return Icon.PowerSource.battery
+        elif val == "ac":
+            return Icon.PowerSource.ac
+        elif val == "battery+ac":
+            return Icon.PowerSource.battery_ac
+        return "mdi:alert"
+
     # -- # ---- # -- # ---- # -- # ---- # -- # ---- # -- # ---- # -- # ---- # -- #
 
     async def set_move(self, value: MOVE) -> None:
@@ -311,7 +373,7 @@ class FanZhimiZA5(FanZhimi):
         if rpm == 0:
             return Icon.SpeedRpm.off
         
-        icon = [(436, Icon.SpeedRpm.fan_speed_1), (731, Icon.SpeedRpm.fan_speed_2), (909, Icon.SpeedRpm.fan_speed_3)]
+        icon = [(436, Icon.SpeedRpm.fan_speed_1), (731, Icon.SpeedRpm.fan_speed_2), (909 + 1, Icon.SpeedRpm.fan_speed_3)]
 
         step = self.max_speed_rpm / len(icon)
 
@@ -327,12 +389,6 @@ class FanZhimiZA5(FanZhimi):
     async def speed_rpm(self) -> int:
         return await self._get(_command=SPIIDFanXiaomiZA5.CustomService.speed_rpm)
 
-    # -- # ---- # -- # ---- # -- # ---- # -- # ---- # -- # ---- # -- # ---- # -- #
-
-    @property
-    async def ac_state(self):
-        return await self._get(_command=SPIIDFanXiaomiZA5.CustomService.ac_state)
-    
     # -- # ---- # -- # ---- # -- # ---- # -- # ---- # -- # ---- # -- # ---- # -- #
 
     @property
@@ -353,10 +409,18 @@ class FanZhimiZA5(FanZhimi):
     # -- # ---- # -- # ---- # -- # ---- # -- # ---- # -- # ---- # -- # ---- # -- #
 
     @property
+    def icon_temperature(self):
+        return Icon.Temperature.thermometer
+
+    @property
     async def temperature(self) -> float:
         return await self._get(_command=SPIIDFanXiaomiZA5.Environment.temperature)
 
     # -- # ---- # -- # ---- # -- # ---- # -- # ---- # -- # ---- # -- # ---- # -- #
+
+    @property
+    def icon_humidity(self):
+        return Icon.Humidity.humidity
 
     @property
     async def humidity(self) -> float:
